@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PlantCare AI — Truy cập</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+.code-input {
+  font-size: 2rem; letter-spacing: 0.5em; text-align: center;
+  font-family: 'Courier New', monospace; width: 100%;
+  background: rgba(11,33,23,0.9); border: 2px solid rgba(82,183,136,0.3);
+  border-radius: 12px; color: var(--mint); padding: 16px;
+}
+.code-input:focus { border-color: var(--sage); box-shadow: 0 0 0 4px rgba(82,183,136,0.15); }
+.code-dots { display: flex; gap: 12px; justify-content: center; margin: 12px 0; }
+.code-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(82,183,136,0.2); transition: all 0.2s; }
+.code-dot.filled { background: var(--sage); }
+.gate-error { color: #ef4444; font-size: 0.85rem; margin-top: 8px; min-height: 20px; text-align: center; }
+.gate-divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; color: var(--text-muted); font-size: 0.8rem; }
+.gate-divider::before, .gate-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+</style>
+</head>
+<body>
+<div class="gate-leaf-bg">
+  <span class="gate-leaf" style="top:5%;left:10%">🌿</span>
+  <span class="gate-leaf" style="top:50%;right:8%">🍃</span>
+  <span class="gate-leaf" style="bottom:10%;left:30%">🌱</span>
+</div>
+
+<div class="gate-page">
+  <div class="gate-card fade-in">
+    <span class="gate-icon">🌿</span>
+    <h1>PlantCare AI</h1>
+    <p>Hệ thống tưới cây thông minh<br>Nhập mã bảo mật để tiếp tục</p>
+
+    <div class="form-group">
+      <label>Mã bí mật (8 chữ số)</label>
+      <input type="password" id="codeInput" class="code-input" maxlength="8"
+        inputmode="numeric" pattern="[0-9]*"
+        placeholder="••••••••" autocomplete="off">
+      <div class="code-dots" id="codeDots">
+        <div class="code-dot"></div><div class="code-dot"></div>
+        <div class="code-dot"></div><div class="code-dot"></div>
+        <div class="code-dot"></div><div class="code-dot"></div>
+        <div class="code-dot"></div><div class="code-dot"></div>
+      </div>
+      <div class="gate-error" id="gateError"></div>
+    </div>
+
+    <button class="btn btn-primary btn-full" onclick="checkCode()">
+      🔑 Truy cập
+    </button>
+
+    <div class="gate-divider">hoặc</div>
+
+    <a href="howitworks.html" class="btn btn-secondary btn-full">
+      👁 Xem cách hoạt động
+    </a>
+
+    <p style="margin-top:20px;font-size:0.75rem;color:var(--text-muted)">
+      Demo prototype — Không dùng trong môi trường sản xuất
+    </p>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+// If already passed this session, go directly to auth/dashboard
+if (sessionStorage.getItem('gatePassed') === 'true') {
+  var cu = Auth.getCurrentUser();
+  window.location.href = cu ? 'dashboard.html' : 'auth.html';
+}
+
+var codeInput = document.getElementById('codeInput');
+var dots = document.querySelectorAll('.code-dot');
+var gateError = document.getElementById('gateError');
+
+codeInput.addEventListener('input', function() {
+  var len = codeInput.value.length;
+  for (var i = 0; i < dots.length; i++) {
+    dots[i].classList.toggle('filled', i < len);
+  }
+  gateError.textContent = '';
+  if (len === 8) checkCode();
+});
+
+codeInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') checkCode();
+});
+
+function checkCode() {
+  var val = codeInput.value.replace(/[^0-9]/g, '');
+  if (val === '28022026') {
+    sessionStorage.setItem('gatePassed', 'true');
+    codeInput.style.borderColor = 'var(--sage)';
+    gateError.style.color = 'var(--sage)';
+    gateError.textContent = '✓ Mã đúng! Đang chuyển hướng...';
+    setTimeout(function() { window.location.href = 'auth.html'; }, 400);
+  } else if (val.length === 8) {
+    gateError.textContent = '❌ Mã không đúng. Vui lòng thử lại.';
+    gateError.style.color = '#ef4444';
+    codeInput.value = '';
+    for (var i = 0; i < dots.length; i++) dots[i].classList.remove('filled');
+    codeInput.style.borderColor = '#ef4444';
+    setTimeout(function() { codeInput.style.borderColor = ''; }, 1200);
+  }
+}
+
+codeInput.focus();
+</script>
+</body>
+</html>
