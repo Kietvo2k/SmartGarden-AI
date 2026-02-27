@@ -3,21 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartGarden AI Prototype - V1</title>
+    <title>Smart Irrigation Prototype - V2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .hidden { display: none !important; }
         
-        /* SVG Plant Animation */
-        .plant-leaf { transition: fill 1s ease-in-out; }
-        .healthy-leaf { fill: #4ade80; } 
-        .dry-leaf { fill: #fbbf24; } 
-        .critical-leaf { fill: #f87171; } 
-        
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
@@ -25,27 +19,27 @@
         /* Modal Backdrop */
         .modal-backdrop { background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); }
 
-        /* Highlight Moisture text */
-        .text-glow { text-shadow: 0 0 20px rgba(52, 211, 153, 0.3); }
-        .text-glow-red { text-shadow: 0 0 20px rgba(248, 113, 113, 0.3); }
-        .text-glow-amber { text-shadow: 0 0 20px rgba(251, 191, 36, 0.3); }
+        /* Highlight text */
+        .text-glow { text-shadow: 0 0 20px rgba(52, 211, 153, 0.4); }
+        .text-glow-red { text-shadow: 0 0 20px rgba(248, 113, 113, 0.4); }
+        .text-glow-amber { text-shadow: 0 0 20px rgba(251, 191, 36, 0.4); }
     </style>
 </head>
 <body class="text-slate-800 antialiased h-screen flex flex-col overflow-hidden">
 
     <!-- Navbar -->
-    <nav id="navbar" class="bg-white border-b border-slate-200 px-6 py-3 flex justify-between items-center shrink-0 hidden z-10">
+    <nav id="navbar" class="bg-white border-b border-slate-200 px-4 md:px-6 py-3 flex justify-between items-center shrink-0 hidden z-10">
         <div class="flex items-center gap-2 cursor-pointer" onclick="Router.navigate('dashboard')">
-            <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
-            <span class="font-bold text-lg tracking-tight text-emerald-900">SmartGarden AI<span class="text-xs font-normal text-slate-400 ml-1">v1</span></span>
+            <svg class="w-7 h-7 md:w-8 md:h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+            <span class="font-bold text-base md:text-lg tracking-tight text-emerald-900">AgriAI<span class="text-[10px] md:text-xs font-normal text-slate-400 ml-1">v2</span></span>
         </div>
-        <div class="flex items-center gap-4">
-            <span id="nav-user-name" class="text-sm font-medium text-slate-600 hidden sm:block"></span>
-            <button id="btn-admin-panel" onclick="Router.navigate('admin')" class="hidden relative text-sm bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-md font-medium hover:bg-indigo-100 transition">
-                Admin Panel
+        <div class="flex items-center gap-3 md:gap-4">
+            <span id="nav-user-name" class="text-xs md:text-sm font-medium text-slate-600 hidden sm:block"></span>
+            <button id="btn-admin-panel" onclick="Router.navigate('admin')" class="hidden relative text-xs md:text-sm bg-indigo-50 text-indigo-600 px-2 py-1 md:px-3 md:py-1.5 rounded-md font-medium hover:bg-indigo-100 transition">
+                Admin
                 <span id="admin-badge" class="hidden absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">0</span>
             </button>
-            <button onclick="Auth.logout()" class="text-sm text-slate-500 hover:text-red-600 transition font-medium">Đăng xuất</button>
+            <button onclick="Auth.logout()" class="text-xs md:text-sm text-slate-500 hover:text-red-600 transition font-medium">Đăng xuất</button>
         </div>
     </nav>
 
@@ -54,24 +48,24 @@
         
         <!-- ================= VIEW: GATE ================= -->
         <section id="view-gate" class="absolute inset-0 bg-emerald-900 flex items-center justify-center p-4">
-            <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md text-center transform transition-all">
+            <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 w-full max-w-md text-center transform transition-all">
                 <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                 </div>
-                <h1 class="text-2xl font-bold text-slate-800 mb-2">Cổng Truy Cập Kín</h1>
+                <h1 class="text-xl md:text-2xl font-bold text-slate-800 mb-2">Cổng Truy Cập Kín</h1>
                 <p class="text-slate-500 text-sm mb-6">Vui lòng nhập mã bí mật (8 chữ số) để truy cập hệ thống prototype.</p>
                 
-                <input type="password" id="gate-code" maxlength="8" class="w-full text-center tracking-[0.5em] font-mono text-2xl p-4 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:ring-0 outline-none transition-colors mb-4" placeholder="••••••••">
-                <p id="gate-error" class="text-red-600 font-bold bg-red-50 py-2 px-3 rounded text-sm mb-4 hidden border border-red-200">Mã bí mật không chính xác! Vui lòng thử lại. Gợi ý 28022026</p>
+                <input type="password" id="gate-code" maxlength="8" class="w-full text-center tracking-[0.5em] font-mono text-xl md:text-2xl p-3 md:p-4 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:ring-0 outline-none transition-colors mb-4" placeholder="••••••••">
+                <p id="gate-error" class="text-red-600 font-bold bg-red-50 py-2 px-3 rounded text-sm mb-4 hidden border border-red-200">Mã bí mật không chính xác!</p>
                 
                 <button onclick="checkGate()" class="w-full bg-emerald-600 text-white font-semibold py-3 rounded-xl hover:bg-emerald-700 transition shadow-lg shadow-emerald-200 mb-4">Mở Khóa</button>
-                <button onclick="Router.navigate('howitworks')" class="w-full bg-slate-100 text-slate-600 font-medium py-3 rounded-xl hover:bg-slate-200 transition">Xem cách hoạt động (Public Demo) →</button>
+                <button onclick="Router.navigate('howitworks')" class="w-full bg-slate-100 text-slate-600 font-medium py-3 rounded-xl hover:bg-slate-200 transition text-sm md:text-base">Xem cách hoạt động (Public Demo) →</button>
             </div>
         </section>
 
         <!-- ================= VIEW: AUTH ================= -->
         <section id="view-auth" class="absolute inset-0 flex items-center justify-center p-4 bg-slate-50 hidden">
-            <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-8 w-full max-w-md">
+            <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-6 md:p-8 w-full max-w-md">
                 <div class="flex justify-center mb-6">
                     <div class="flex p-1 bg-slate-100 rounded-lg w-full">
                         <button id="tab-login" onclick="UI.switchAuthTab('login')" class="flex-1 py-2 text-sm font-medium rounded-md bg-white shadow-sm text-slate-800">Đăng nhập</button>
@@ -82,11 +76,11 @@
                 <form id="form-login" onsubmit="Auth.handleLogin(event)">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                        <input type="email" id="login-email" required class="w-full p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 outline-none">
+                        <input type="email" id="login-email" required class="w-full p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 outline-none text-sm">
                     </div>
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-slate-700 mb-1">Mật khẩu</label>
-                        <input type="password" id="login-pass" required class="w-full p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 outline-none">
+                        <input type="password" id="login-pass" required class="w-full p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 outline-none text-sm">
                     </div>
                     <button type="submit" class="w-full bg-slate-800 text-white font-medium py-2.5 rounded-lg hover:bg-slate-900 transition">Đăng nhập</button>
                 </form>
@@ -94,74 +88,74 @@
                 <form id="form-register" class="hidden" onsubmit="Auth.handleRegister(event)">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-slate-700 mb-1">Tên hiển thị</label>
-                        <input type="text" id="reg-name" required class="w-full p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 outline-none">
+                        <input type="text" id="reg-name" required class="w-full p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 outline-none text-sm">
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                        <input type="email" id="reg-email" required class="w-full p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 outline-none">
+                        <input type="email" id="reg-email" required class="w-full p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 outline-none text-sm">
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-slate-700 mb-1">Mật khẩu (tối thiểu 8 ký tự)</label>
-                        <input type="password" id="reg-pass" required minlength="8" class="w-full p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 outline-none">
+                        <input type="password" id="reg-pass" required minlength="8" class="w-full p-2.5 border border-slate-300 rounded-lg focus:border-emerald-500 outline-none text-sm">
                     </div>
                     <button type="submit" class="w-full bg-emerald-600 text-white font-medium py-2.5 rounded-lg hover:bg-emerald-700 transition">Tạo tài khoản</button>
                 </form>
-                
-                <p class="text-xs text-slate-400 text-center mt-6">Cảnh báo: Sản phẩm này chỉ là thử nghiệm nên sẽ có sai sót</p>
             </div>
         </section>
 
         <!-- ================= VIEW: DASHBOARD ================= -->
-        <section id="view-dashboard" class="max-w-6xl mx-auto p-6 hidden">
-            <div class="flex justify-between items-end mb-8">
+        <section id="view-dashboard" class="max-w-6xl mx-auto p-4 md:p-6 hidden">
+            <div class="flex justify-between items-end mb-6 md:mb-8">
                 <div>
-                    <h2 class="text-2xl font-bold text-slate-800">Vườn của bạn</h2>
-                    <p class="text-slate-500 mt-1">Quản lý tối đa 3 cây trồng (giới hạn để tiết kiệm tài nguyên).</p>
+                    <h2 class="text-xl md:text-2xl font-bold text-slate-800">Vườn của bạn</h2>
+                    <p class="text-slate-500 mt-1 text-xs md:text-sm">Quản lý tối đa 3 cây trồng.</p>
                 </div>
                 <div class="group relative">
-                    <button id="btn-add-plant" onclick="UI.openPlantModal()" class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-emerald-700 transition flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    <button id="btn-add-plant" onclick="UI.openPlantModal()" class="bg-emerald-600 text-white px-3 py-2 md:px-4 md:py-2 rounded-lg text-sm md:text-base font-medium hover:bg-emerald-700 transition flex items-center gap-1 md:gap-2">
+                        <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         Thêm cây
                     </button>
+                    <div id="tooltip-plant-limit" class="hidden absolute bottom-full right-0 mb-2 w-48 bg-slate-800 text-white text-xs rounded py-1 px-2 text-center z-10 shadow-lg">
+                        Đã đạt giới hạn 3 cây.
+                    </div>
                 </div>
             </div>
 
-            <div id="plant-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div id="plant-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <!-- Cards injected via JS -->
             </div>
             
-            <div id="empty-state" class="hidden text-center py-20 bg-white rounded-2xl border border-slate-200 border-dashed">
-                <svg class="w-16 h-16 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
-                <h3 class="text-lg font-medium text-slate-700">Chưa có cây nào</h3>
-                <p class="text-slate-500 text-sm mt-1">Hãy thêm cây đầu tiên để AI bắt đầu tính toán.</p>
+            <div id="empty-state" class="hidden text-center py-16 md:py-20 bg-white rounded-2xl border border-slate-200 border-dashed mx-4 md:mx-0">
+                <svg class="w-12 h-12 md:w-16 md:h-16 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                <h3 class="text-base md:text-lg font-medium text-slate-700">Chưa có cây nào</h3>
+                <p class="text-slate-500 text-xs md:text-sm mt-1">Hãy thêm cây đầu tiên để AI bắt đầu tính toán.</p>
             </div>
         </section>
 
         <!-- ================= VIEW: PLANT DETAIL ================= -->
-        <section id="view-plant" class="max-w-6xl mx-auto p-6 hidden">
+        <section id="view-plant" class="max-w-6xl mx-auto p-4 md:p-6 hidden">
             <!-- Header Strip -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                 <div>
-                    <button onclick="Router.navigate('dashboard')" class="text-slate-400 hover:text-slate-600 text-sm font-medium mb-1 flex items-center gap-1">← Quay lại</button>
-                    <h2 id="pd-name" class="text-3xl font-bold text-slate-800">Tên cây</h2>
-                    <div class="flex gap-2 mt-1">
-                        <p id="pd-type-tag" class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded inline-block font-medium text-xs">Loại cây</p>
-                        <p id="pd-loc-tag" class="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded inline-block font-medium text-xs">Vị trí</p>
-                        <p id="pd-age-tag" class="text-slate-600 bg-slate-100 px-2 py-0.5 rounded inline-block font-medium text-xs">Tuổi</p>
+                    <button onclick="Router.navigate('dashboard')" class="text-slate-400 hover:text-slate-600 text-xs md:text-sm font-medium mb-1 flex items-center gap-1">← Quay lại</button>
+                    <h2 id="pd-name" class="text-2xl md:text-3xl font-bold text-slate-800">Tên cây</h2>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        <p id="pd-type-tag" class="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded font-medium text-[10px] md:text-xs">Loại cây</p>
+                        <p id="pd-loc-tag" class="text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded font-medium text-[10px] md:text-xs">Vị trí</p>
+                        <p id="pd-age-tag" class="text-slate-700 bg-slate-200 px-2 py-0.5 rounded font-medium text-[10px] md:text-xs">Tuổi</p>
                     </div>
                 </div>
-                <div class="flex gap-2 bg-white p-1 rounded-lg border border-slate-200 shadow-sm flex-wrap items-center">
-                    <button onclick="UI.openPlantModal(state.currentPlantId)" class="px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded">Sửa cấu hình</button>
-                    <button onclick="exportPlantData()" class="px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded">Export JSON</button>
-                    <button onclick="manualWater()" class="px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded border border-blue-100 flex items-center gap-1">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2.5c-.244 0-.472.105-.632.289l-5.25 6A.833.833 0 004.167 10h1.226a4.167 4.167 0 109.214 0h1.226a.833.833 0 00.049-1.211l-5.25-6A.833.833 0 0010 2.5z" clip-rule="evenodd"></path></svg>
-                        Tưới Ngay
+                <!-- Control Buttons -->
+                <div class="grid grid-cols-2 sm:flex sm:flex-row gap-2 w-full md:w-auto bg-white p-1 rounded-lg border border-slate-200 shadow-sm items-center">
+                    <button onclick="UI.openPlantModal(state.currentPlantId)" class="px-2 py-2 md:px-3 md:py-1.5 text-xs md:text-sm font-medium text-slate-600 hover:bg-slate-50 rounded">Sửa cấu hình</button>
+                    <button onclick="exportPlantData()" class="px-2 py-2 md:px-3 md:py-1.5 text-xs md:text-sm font-medium text-slate-600 hover:bg-slate-50 rounded">Xuất JSON</button>
+                    <button onclick="manualWater()" class="px-2 py-2 md:px-3 md:py-1.5 text-xs md:text-sm font-medium text-blue-600 hover:bg-blue-50 rounded border border-blue-100 flex items-center justify-center gap-1">
+                        <svg class="w-3 h-3 md:w-4 md:h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2.5c-.244 0-.472.105-.632.289l-5.25 6A.833.833 0 004.167 10h1.226a4.167 4.167 0 109.214 0h1.226a.833.833 0 00.049-1.211l-5.25-6A.833.833 0 0010 2.5z" clip-rule="evenodd"></path></svg>
+                        Bơm Ngay
                     </button>
-                    <button onclick="UI.openReportModal()" class="px-3 py-1.5 text-sm font-medium text-amber-600 hover:bg-amber-50 rounded border border-amber-100 flex items-center gap-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    <button onclick="UI.openReportModal()" class="px-2 py-2 md:px-3 md:py-1.5 text-xs md:text-sm font-medium text-amber-600 hover:bg-amber-50 rounded border border-amber-100 flex items-center justify-center gap-1">
                         Báo lỗi
                     </button>
-                    <button onclick="deleteCurrentPlant()" class="px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded">Xóa</button>
                 </div>
             </div>
 
@@ -169,141 +163,148 @@
             <div id="alerts-panel" class="mb-6 space-y-2 empty:hidden"></div>
 
             <!-- HERO SOIL MOISTURE SECTION -->
-            <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-lg p-8 mb-6 text-white relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
-                <div class="absolute -right-10 -bottom-10 opacity-10">
-                    <svg class="w-64 h-64" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.757l4.9-4.9a2 2 0 000-2.828L13.485 5.1a2 2 0 00-2.828 0L10 5.757v8.486zM16 18H9.071l6-6H16a2 2 0 012 2v2a2 2 0 01-2 2z" clip-rule="evenodd"></path></svg>
+            <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-lg p-6 md:p-8 mb-6 text-white relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-6">
+                <div class="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
+                    <svg class="w-48 h-48 md:w-64 md:h-64" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zm1 14a1 1 0 100-2 1 1 0 000 2zm5-1.757l4.9-4.9a2 2 0 000-2.828L13.485 5.1a2 2 0 00-2.828 0L10 5.757v8.486zM16 18H9.071l6-6H16a2 2 0 012 2v2a2 2 0 01-2 2z" clip-rule="evenodd"></path></svg>
                 </div>
                 
-                <div class="flex-1 z-10 text-center md:text-left">
-                    <h3 class="text-slate-300 font-medium tracking-wide uppercase text-sm mb-2">Độ ẩm đất hiện tại</h3>
-                    <div class="flex items-baseline justify-center md:justify-start gap-4">
-                        <span id="hero-moisture-val" class="text-6xl md:text-8xl font-black text-glow tracking-tighter text-emerald-400">--%</span>
-                        <span id="hero-status-badge" class="px-3 py-1 rounded-full text-sm font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Tuyệt vời</span>
+                <div class="flex-1 z-10 text-center lg:text-left w-full">
+                    <h3 class="text-slate-300 font-medium tracking-wide uppercase text-xs md:text-sm mb-2">Độ ẩm đất hiện tại</h3>
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-2 sm:gap-4">
+                        <span id="hero-moisture-val" class="text-5xl sm:text-6xl md:text-8xl font-black text-glow tracking-tighter text-emerald-400">--%</span>
+                        <span id="hero-status-badge" class="px-3 py-1 mt-2 sm:mt-0 rounded-full text-xs md:text-sm font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Tuyệt vời</span>
                     </div>
-                    <p class="text-slate-400 mt-3 text-sm flex items-center justify-center md:justify-start gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        Cập nhật lúc: <span id="hero-updated-at" class="text-slate-200">--</span>
+                    <p class="text-slate-400 mt-4 text-xs md:text-sm flex items-center justify-center lg:justify-start gap-1.5">
+                        <svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Cập nhật: <span id="hero-updated-at" class="text-slate-200">--</span>
                     </p>
                 </div>
 
-                <div class="w-full md:w-1/3 bg-slate-800/50 backdrop-blur rounded-xl p-5 border border-slate-700/50 z-10">
-                    <h4 class="font-bold text-slate-200 flex items-center gap-2 mb-4">
-                        <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        Dự đoán tương lai (Predict)
+                <div class="w-full lg:w-1/3 bg-slate-800/60 backdrop-blur rounded-xl p-4 md:p-5 border border-slate-700/50 z-10">
+                    <h4 class="font-bold text-slate-200 flex items-center gap-2 mb-2 md:mb-4 text-sm md:text-base">
+                        <svg class="w-4 h-4 md:w-5 md:h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        Máy Dự Đoán (Predictor)
                     </h4>
-                    <p class="text-xs text-slate-400 mb-3">Dự báo mức ẩm tại thời điểm xác định (Tối đa 5 ngày tới).</p>
-                    <input type="datetime-local" id="predict-datetime" class="w-full bg-slate-900 border border-slate-600 text-white p-2 rounded text-sm mb-3 outline-none focus:border-indigo-500">
-                    <button onclick="Predictor.runUserPrediction()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 rounded transition shadow-lg shadow-indigo-500/30">Tính Toán Dự Đoán</button>
+                    <p class="text-[10px] md:text-xs text-slate-400 mb-3">Dự báo mức ẩm tương lai (Max 5 ngày).</p>
+                    <input type="datetime-local" id="predict-datetime" class="w-full bg-slate-900 border border-slate-600 text-white p-2 rounded text-xs md:text-sm mb-3 outline-none focus:border-indigo-500">
+                    <button onclick="Predictor.runUserPrediction()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium py-2 rounded transition shadow-lg shadow-indigo-500/30">Tính Toán Nhanh</button>
                 </div>
             </div>
 
             <!-- Main Content Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Left: Visual UI -->
-                <div class="bg-white rounded-2xl border border-slate-200 p-8 flex flex-col items-center justify-center relative min-h-[400px]">
-                    <div class="absolute top-4 right-4 bg-slate-50 px-3 py-1 rounded-full text-xs font-medium text-slate-600 border border-slate-200 shadow-sm">
-                        <span class="text-orange-500">Nhiệt: <span id="visual-temp">--</span>°C</span>
+                <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col items-center justify-center relative min-h-[350px] md:min-h-[400px]">
+                    <div class="absolute top-4 left-4 right-4 flex justify-between pointer-events-none">
+                         <!-- Placeholder for extra badges if needed -->
+                         <div></div> 
+                         <div class="flex flex-col gap-2 items-end">
+                            <div class="bg-slate-50 px-2 py-1 md:px-3 md:py-1 rounded-full text-[10px] md:text-xs font-medium text-slate-600 border border-slate-200 shadow-sm">
+                                <span class="text-orange-500">Nhiệt: <span id="visual-temp">--</span>°C</span>
+                            </div>
+                            <div class="bg-slate-50 px-2 py-1 md:px-3 md:py-1 rounded-full text-[10px] md:text-xs font-medium text-slate-600 border border-slate-200 shadow-sm">
+                                <span class="text-blue-500">Ẩm KK: <span id="visual-humidity">--</span>%</span>
+                            </div>
+                        </div>
                     </div>
                     
-                    <!-- SVG Plant -->
-                    <svg class="w-48 h-64 overflow-visible mb-6" viewBox="0 0 100 150">
+                    <!-- Dynamic SVG Plant -->
+                    <svg class="w-40 h-56 md:w-48 md:h-64 overflow-visible mb-6 mt-8" viewBox="0 0 100 150">
                         <path id="svg-loc" d="M 20 100 L 80 100 L 70 140 L 30 140 Z" fill="#475569" />
                         <ellipse id="svg-loc-top" cx="50" cy="100" rx="30" ry="10" fill="#334155" />
-                        <path d="M 50 100 Q 40 60 50 20" fill="none" stroke="#22c55e" stroke-width="4" stroke-linecap="round" />
-                        <path class="plant-leaf healthy-leaf" d="M 48 70 Q 20 60 30 40 Q 40 50 48 70 Z" />
-                        <path class="plant-leaf healthy-leaf" d="M 49 45 Q 80 30 70 10 Q 60 25 49 45 Z" />
-                        <path class="plant-leaf healthy-leaf" d="M 50 20 Q 30 5 40 -10 Q 50 0 50 20 Z" />
+                        <g id="svg-plant-group"></g>
                     </svg>
 
-                    <!-- Plant Health Bar (AI Predict) -->
+                    <!-- Plant Health Bar -->
                     <div class="w-full mt-auto">
-                        <div class="flex justify-between text-sm mb-1">
-                            <span class="text-slate-500 font-medium flex items-center gap-1">Sức khỏe cây</span>
+                        <div class="flex justify-between text-xs md:text-sm mb-1">
+                            <span class="text-slate-500 font-medium flex items-center gap-1">Sức khỏe sinh học</span>
                             <span id="pb-health-text" class="font-bold text-slate-700">--%</span>
                         </div>
                         <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
                             <div id="pb-health-fill" class="bg-blue-500 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
                         </div>
-                        <p id="health-status-text" class="text-xs text-slate-500 mt-1 italic font-medium">--</p>
+                        <p id="health-status-text" class="text-[10px] md:text-xs text-slate-500 mt-1.5 italic font-medium">--</p>
                     </div>
                 </div>
 
                 <!-- Right: Data Panels -->
                 <div class="lg:col-span-2 space-y-6">
                     <!-- Control & Simulation Panel -->
-                    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                        <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 border-b border-slate-100 pb-4 gap-4">
-                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                                Mô phỏng & Điều khiển (Realtime / Giả lập)
+                    <div class="bg-white rounded-2xl border border-slate-200 p-5 md:p-6 shadow-sm">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 border-b border-slate-100 pb-4 gap-3">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm md:text-base">
+                                Mô phỏng & Điều khiển
                             </h3>
-                            <div class="flex gap-2 items-center">
-                                <span id="pulsed-status" class="hidden text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded animate-pulse border border-blue-200">Đang bơm nhỏ giọt...</span>
-                                <div class="bg-slate-100 px-3 py-1 rounded text-sm font-medium text-slate-700 flex items-center gap-2">
-                                    Chế độ: <span id="lbl-mode" class="text-emerald-600">--</span>
+                            <div class="flex flex-wrap gap-2 items-center">
+                                <span id="pulsed-status" class="hidden text-[10px] md:text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded animate-pulse border border-blue-200">Đang bơm...</span>
+                                <div class="bg-slate-100 px-2 py-1 md:px-3 md:py-1 rounded text-xs md:text-sm font-medium text-slate-700 flex items-center gap-1">
+                                    <span id="lbl-mode" class="text-emerald-600">--</span>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Weather Controls -->
-                        <div class="flex flex-wrap gap-2 mb-5 bg-slate-50 p-3 rounded-lg border border-slate-200 items-center justify-between w-full">
+                        <div class="flex flex-col sm:flex-row gap-3 sm:gap-2 mb-5 bg-slate-50 p-3 rounded-lg border border-slate-200 items-start sm:items-center justify-between w-full">
                             <div>
-                                <span class="text-xs font-bold text-slate-600 block mb-1">Dự báo 5 ngày (Sync API): <span id="lbl-weather-desc" class="font-normal text-indigo-600 ml-1">Bình thường</span></span>
+                                <span class="text-[10px] md:text-xs font-bold text-slate-600 block mb-1">Thời tiết API: <span id="lbl-weather-desc" class="font-normal text-indigo-600 ml-1">--</span></span>
                             </div>
-                            <div class="flex gap-2">
-                                <button onclick="WeatherManager.setSim('sun')" class="text-xs bg-orange-100 text-orange-700 px-3 py-1.5 rounded hover:bg-orange-200 transition font-medium border border-orange-200">Ép Nắng</button>
-                                <button onclick="WeatherManager.setSim('rain')" class="text-xs bg-cyan-100 text-cyan-700 px-3 py-1.5 rounded hover:bg-cyan-200 transition font-medium border border-cyan-200">Ép Mưa</button>
-                                <button onclick="WeatherManager.fetchForecast()" class="text-xs bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded hover:bg-indigo-200 transition font-medium border border-indigo-200">Khôi phục API</button>
+                            <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                                <button onclick="WeatherManager.setSim('sun')" class="flex-1 sm:flex-none text-[10px] md:text-xs bg-orange-100 text-orange-700 px-2 py-1.5 rounded hover:bg-orange-200 font-medium border border-orange-200">Ép Nắng</button>
+                                <button onclick="WeatherManager.setSim('rain')" class="flex-1 sm:flex-none text-[10px] md:text-xs bg-cyan-100 text-cyan-700 px-2 py-1.5 rounded hover:bg-cyan-200 font-medium border border-cyan-200">Ép Mưa</button>
+                                <button onclick="WeatherManager.fetchForecast()" class="flex-1 sm:flex-none w-full sm:w-auto text-[10px] md:text-xs bg-indigo-100 text-indigo-700 px-2 py-1.5 rounded hover:bg-indigo-200 font-medium border border-indigo-200">Dùng API</button>
                             </div>
                         </div>
 
-                        <div class="flex flex-wrap gap-4 items-center">
-                            <div class="bg-slate-50 px-4 py-2 rounded-lg border border-slate-200">
-                                <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Thời gian mô phỏng (now)</p>
-                                <p id="sim-time" class="font-mono font-medium text-slate-800 text-sm">--:--:--</p>
+                        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                            <div class="bg-slate-50 px-3 py-2 md:px-4 md:py-2 rounded-lg border border-slate-200 w-full sm:w-auto">
+                                <p class="text-[10px] md:text-xs text-slate-500 uppercase tracking-wider mb-1">Thời gian giả lập</p>
+                                <p id="sim-time" class="font-mono font-medium text-slate-800 text-xs md:text-sm">--:--:--</p>
                             </div>
-                            <div class="flex-1">
-                                <label class="text-xs text-slate-500 block mb-1">Gia tốc thời gian (Accel)</label>
-                                <select id="sim-speed" onchange="Simulation.setSpeed(parseInt(this.value))" class="text-sm p-1.5 border border-slate-300 rounded bg-white w-full max-w-[200px]">
-                                    <option value="1">x1 (Thời gian thực)</option>
-                                    <option value="60">x60 (1p sim = 1s thực)</option>
-                                    <option value="600">x600 (10p sim = 1s thực)</option>
+                            <div class="flex-1 w-full">
+                                <label class="text-[10px] md:text-xs text-slate-500 block mb-1">Tốc độ (Auto-Stop sau 5 ngày)</label>
+                                <select id="sim-speed" onchange="Simulation.setSpeed(parseInt(this.value))" class="text-xs md:text-sm p-1.5 border border-slate-300 rounded bg-white w-full sm:max-w-[200px] outline-none">
+                                    <option value="1">x1 (Thực tế)</option>
+                                    <option value="60">x60 (1p = 1s thực)</option>
+                                    <option value="600">x600 (10p = 1s thực)</option>
+                                    <option value="3600">x3600 (1 giờ = 1s thực)</option>
                                 </select>
                             </div>
                         </div>
                     </div>
 
                     <!-- Environment & Rules Context -->
-                    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div class="bg-white rounded-2xl border border-slate-200 p-4 md:p-6 shadow-sm grid grid-cols-2 md:grid-cols-4 gap-4 text-xs md:text-sm">
                         <div>
-                            <span class="block text-slate-400 text-xs">Loại đất (Tính chất)</span>
+                            <span class="block text-slate-400 text-[10px] md:text-xs mb-1">Loại đất</span>
                             <span id="ai-soil-type" class="font-bold text-slate-700 capitalize">--</span>
                         </div>
                         <div>
-                            <span class="block text-slate-400 text-xs">Thể tích vùng rễ</span>
+                            <span class="block text-slate-400 text-[10px] md:text-xs mb-1">Vùng rễ</span>
                             <span id="ai-root-vol" class="font-bold text-slate-700">-- L</span>
                         </div>
                         <div>
-                            <span class="block text-slate-400 text-xs">Giới hạn tưới Max an toàn</span>
+                            <span class="block text-slate-400 text-[10px] md:text-xs mb-1">Max An toàn</span>
                             <span id="ai-safe-max" class="font-bold text-amber-600">-- L</span>
                         </div>
                         <div>
-                            <span class="block text-slate-400 text-xs">Hành động tự động (AI)</span>
+                            <span class="block text-slate-400 text-[10px] md:text-xs mb-1">Tình trạng bơm</span>
                             <span id="ai-decision-text" class="font-bold text-slate-700">--</span>
                         </div>
                     </div>
 
                     <!-- Logs Table -->
-                    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-                        <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-                            <h3 class="font-bold text-slate-800">Lịch sử tưới (Log & Pulses)</h3>
+                    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col">
+                        <div class="px-4 md:px-6 py-3 md:py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                            <h3 class="font-bold text-slate-800 text-sm md:text-base">Nhật ký nước (Bơm/Mưa)</h3>
                         </div>
-                        <div class="max-h-48 overflow-y-auto">
-                            <table class="w-full text-left text-sm text-slate-600">
+                        <div class="overflow-x-auto max-h-48 md:max-h-60">
+                            <table class="w-full text-left text-xs md:text-sm text-slate-600 whitespace-nowrap">
                                 <thead class="bg-slate-50 sticky top-0 shadow-sm">
                                     <tr>
-                                        <th class="px-6 py-2 font-medium">Thời gian (Sim)</th>
-                                        <th class="px-6 py-2 font-medium">Lượng (Lít)</th>
-                                        <th class="px-6 py-2 font-medium">Loại</th>
+                                        <th class="px-4 md:px-6 py-2 font-medium">Thời gian</th>
+                                        <th class="px-4 md:px-6 py-2 font-medium">Lượng</th>
+                                        <th class="px-4 md:px-6 py-2 font-medium">Sự kiện</th>
                                     </tr>
                                 </thead>
                                 <tbody id="log-tbody" class="divide-y divide-slate-100">
@@ -317,34 +318,34 @@
         </section>
 
         <!-- ================= VIEW: ADMIN ================= -->
-        <section id="view-admin" class="max-w-6xl mx-auto p-6 hidden">
-            <div class="flex justify-between items-end mb-6">
+        <section id="view-admin" class="max-w-6xl mx-auto p-4 md:p-6 hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-indigo-900">Admin Panel</h2>
-                    <p class="text-slate-500 mt-1">Quản lý người dùng, cây & hòm thư lỗi (V1).</p>
+                    <h2 class="text-xl md:text-2xl font-bold text-indigo-900">Admin Panel</h2>
+                    <p class="text-slate-500 mt-1 text-xs md:text-sm">Quản lý hệ thống & ticket người dùng.</p>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="Admin.renderAll()" class="bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-lg font-medium hover:bg-slate-50 transition">↻ Tải lại Data</button>
-                    <button onclick="Router.navigate('dashboard')" class="bg-slate-800 text-white px-4 py-2 rounded-lg font-medium hover:bg-slate-900 transition">Thoát Admin</button>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button onclick="Admin.renderAll()" class="flex-1 sm:flex-none bg-white border border-slate-300 text-slate-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 transition">↻ Tải lại</button>
+                    <button onclick="Router.navigate('dashboard')" class="flex-1 sm:flex-none bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 transition">Thoát</button>
                 </div>
             </div>
 
             <!-- Tabs -->
-            <div class="flex gap-4 mb-4 border-b border-slate-200">
-                <button onclick="Admin.switchTab('users')" id="ad-tab-users" class="px-4 py-2 font-bold text-indigo-600 border-b-2 border-indigo-600">Users & Plants</button>
-                <button onclick="Admin.switchTab('inbox')" id="ad-tab-inbox" class="px-4 py-2 font-medium text-slate-500 hover:text-slate-700">Hòm thư Reports</button>
+            <div class="flex gap-2 md:gap-4 mb-4 border-b border-slate-200 overflow-x-auto whitespace-nowrap">
+                <button onclick="Admin.switchTab('users')" id="ad-tab-users" class="px-3 md:px-4 py-2 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600">Users & Plants</button>
+                <button onclick="Admin.switchTab('inbox')" id="ad-tab-inbox" class="px-3 md:px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700">Hòm thư Tickets</button>
             </div>
 
-            <div id="ad-view-users" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                <table class="w-full text-left text-sm">
+            <div id="ad-view-users" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden overflow-x-auto">
+                <table class="w-full text-left text-xs md:text-sm whitespace-nowrap">
                     <thead class="bg-slate-50 text-slate-600 border-b border-slate-200">
                         <tr>
-                            <th class="px-6 py-3 font-medium">Email</th>
-                            <th class="px-6 py-3 font-medium">Tên hiển thị</th>
-                            <th class="px-6 py-3 font-medium">Role</th>
-                            <th class="px-6 py-3 font-medium">Số cây</th>
-                            <th class="px-6 py-3 font-medium">Trạng thái</th>
-                            <th class="px-6 py-3 font-medium text-right">Hành động</th>
+                            <th class="px-4 py-3 font-medium">Email</th>
+                            <th class="px-4 py-3 font-medium">Tên hiển thị</th>
+                            <th class="px-4 py-3 font-medium">Role</th>
+                            <th class="px-4 py-3 font-medium">Số cây</th>
+                            <th class="px-4 py-3 font-medium">Trạng thái</th>
+                            <th class="px-4 py-3 font-medium text-right">Hành động</th>
                         </tr>
                     </thead>
                     <tbody id="admin-users-tbody" class="divide-y divide-slate-100">
@@ -360,143 +361,131 @@
             </div>
         </section>
 
-        <!-- ================= VIEW: HOW IT WORKS ================= -->
-        <section id="view-howitworks" class="max-w-4xl mx-auto p-6 hidden">
-            <div class="mb-6">
-                <button onclick="Router.navigate('gate')" class="text-slate-400 hover:text-slate-600 text-sm font-medium mb-4 flex items-center gap-1">← Về cổng truy cập</button>
-                <h2 class="text-3xl font-bold text-slate-800">Cách hoạt động (V4)</h2>
-                <p class="text-slate-500 mt-2">Mô hình toán học cân bằng nước và Hệ thống giới hạn Anti-Kill bảo vệ cây trồng.</p>
-            </div>
-            
-            <div class="prose max-w-none text-slate-600 space-y-4">
-                <div class="bg-white p-6 rounded-2xl border border-slate-200">
-                    <h3 class="text-lg font-bold text-slate-800 mb-2">1. Quy tắc bảo vệ rễ (Anti-Kill / Safety Rule)</h3>
-                    <p><b>Quy tắc:</b> Không bao giờ tưới quá 20% tổng thể tích vùng rễ (Root Zone Volume) trong một đợt.</p>
-                    <p>Cây lớn (như cây ăn quả trên đất) có Root Zone rộng sẽ được bơm lượng nước lớn. Các cây trồng chậu nhỏ (VD 2 Lít đất) sẽ bị giới hạn lượng nước tưới rất gắt gao (Max 0.4L) để đất không bị ngập úng gây thối rễ.</p>
-                </div>
-                
-                <div class="bg-white p-6 rounded-2xl border border-slate-200">
-                    <h3 class="text-lg font-bold text-slate-800 mb-2">2. Tính chất Đất & Mô hình dự đoán (Prediction)</h3>
-                    <p>Các loại đất khác nhau (Cát, Sét, Mùn...) tự động được ánh xạ thuộc tính Điểm héo (Wilting point) và Sức chứa nước (Field capacity).</p>
-                    <pre class="bg-slate-800 text-green-400 p-4 rounded-lg text-xs overflow-x-auto"><code>async function predictSoilAt(plant, targetTs) {
-  let waterL = (soilPct / 100) * rootZoneVolume;
-  while(t < targetTs) {
-    let weather = API.getWeather(t); // Tích hợp API theo giờ giả lập
-    let ETc = computeEvaporation(weather);
-    let rain = weather.rain;
-    waterL = waterL + rain - ETc;
-    t += 1 hour;
-  }
-  return (waterL / rootZoneVolume) * 100; // Trả về % độ ẩm dự đoán
-}</code></pre>
-                </div>
-            </div>
-        </section>
-
     </main>
 
     <!-- ================= MODALS ================= -->
-    <!-- Plant Form Modal (Updated V4) -->
+    <!-- Plant Form Modal -->
     <div id="modal-plant" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col">
-            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
-                <h3 id="modal-plant-title" class="font-bold text-lg text-slate-800">Thêm cây mới</h3>
-                <button onclick="UI.closePlantModal()" class="text-slate-400 hover:text-slate-600 text-xl">&times;</button>
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[95vh] flex flex-col">
+            <div class="px-4 md:px-6 py-3 md:py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
+                <h3 id="modal-plant-title" class="font-bold text-base md:text-lg text-slate-800">Thêm cây mới</h3>
+                <button onclick="UI.closePlantModal()" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">&times;</button>
             </div>
-            <div class="p-6 overflow-y-auto flex-1">
+            <div class="p-4 md:p-6 overflow-y-auto flex-1">
                 <form id="form-plant" onsubmit="handlePlantSubmit(event)" class="space-y-4">
                     <input type="hidden" id="p-id">
                     
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-medium text-slate-700 mb-1">Tên hiển thị *</label>
                             <input type="text" id="p-name" required class="w-full p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-sm">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-700 mb-1">Loại cây (Tự gán Kc)</label>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Loại thực vật</label>
                             <select id="p-type" required class="w-full p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-sm">
-                                <option value="Tomato">Cà chua (Rau màu)</option>
-                                <option value="Lettuce">Xà lách (Rau ăn lá)</option>
-                                <option value="Herb">Rau thơm</option>
-                                <option value="Ornamental">Cây cảnh cỡ nhỏ</option>
-                                <option value="Tree">Cây ăn quả/Cây gỗ lớn</option>
+                                <option value="Tomato">Cà chua / Rau ăn quả</option>
+                                <option value="Lettuce">Xà lách / Rau lá</option>
+                                <option value="Herb">Rau thơm / Thảo mộc</option>
+                                <option value="Tree">Cây thân gỗ / Ăn quả</option>
+                                <option value="Ornamental">Xương rồng / Cây cảnh</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-xs font-medium text-slate-700 mb-1">Ngày trồng *</label>
-                            <input type="date" id="p-date" required class="w-full p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-sm">
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Hình dáng UI</label>
+                            <select id="p-size" class="w-full p-2 border border-slate-300 rounded outline-none text-sm">
+                                <option value="small">Mầm non (Nhỏ)</option>
+                                <option value="medium" selected>Phát triển (Vừa)</option>
+                                <option value="large">Trưởng thành (Lớn)</option>
+                            </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-700 mb-1">Độ ẩm ban đầu (%)</label>
-                            <input type="number" id="p-soil-init" min="0" max="100" value="30" class="w-full p-2 border border-slate-300 rounded text-sm">
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Ngày gieo/trồng *</label>
+                            <input type="date" id="p-date" required class="w-full p-2 border border-slate-300 rounded focus:border-emerald-500 outline-none text-sm">
+                        </div>
+                        <div class="col-span-2 md:col-span-1">
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Độ ẩm đất ban đầu (%)</label>
+                            <input type="number" step="any" id="p-soil-init" min="0" max="100" value="40" class="w-full p-2 border border-slate-300 rounded text-sm">
                         </div>
                     </div>
 
-                    <div class="border-t border-slate-100 pt-4 mt-2 bg-slate-50 -mx-6 px-6 pb-4">
-                        <h4 class="text-sm font-semibold text-slate-800 mb-3">Cấu hình Đất / Chậu</h4>
+                    <div class="border-t border-slate-100 pt-4 mt-2 bg-slate-50 -mx-4 md:-mx-6 px-4 md:px-6 pb-4">
+                        <h4 class="text-sm font-semibold text-slate-800 mb-3">Thông số Đất / Chậu (Ảnh hưởng mức bơm Max)</h4>
                         <div class="grid grid-cols-2 gap-4 mb-3">
                             <div>
-                                <label class="block text-xs text-slate-600 mb-1">Vị trí trồng</label>
+                                <label class="block text-xs text-slate-600 mb-1">Cách trồng</label>
                                 <select id="p-loc-type" class="w-full p-2 border border-slate-300 rounded text-sm bg-white" onchange="UI.toggleLocFields()">
                                     <option value="in_pot">Trong chậu</option>
                                     <option value="in_soil">Trực tiếp trên đất</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs text-slate-600 mb-1">Loại đất (Soil Type)</label>
+                                <label class="block text-xs text-slate-600 mb-1">Tính chất đất</label>
                                 <select id="p-soil-type" class="w-full p-2 border border-slate-300 rounded text-sm bg-white">
-                                    <option value="loam">Đất thịt (Loam) - Giữ ẩm tốt</option>
+                                    <option value="loam">Đất thịt (Loam) - Cân bằng</option>
                                     <option value="sand">Đất cát (Sand) - Thoát nước nhanh</option>
-                                    <option value="clay">Đất sét (Clay) - Giữ nước cao</option>
+                                    <option value="clay">Đất sét (Clay) - Dễ úng</option>
                                     <option value="silt">Đất phù sa (Silt)</option>
                                     <option value="peat">Đất than bùn (Peat)</option>
                                     <option value="chalk">Đất phấn (Chalk)</option>
+                                    <option value="loamy_sand">Cát pha thịt (Loamy Sand)</option>
                                 </select>
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs text-slate-600 mb-1">Diện tích bề mặt (m²)</label>
-                                <input type="number" id="p-area" step="0.01" min="0.01" value="0.05" class="w-full p-2 border border-slate-300 rounded text-sm">
+                                <label class="block text-xs text-slate-600 mb-1">Diện tích hứng (m²)</label>
+                                <input type="number" id="p-area" step="any" min="0.0001" value="0.05" class="w-full p-2 border border-slate-300 rounded text-sm">
                             </div>
                             <div id="div-pot-vol">
-                                <label class="block text-xs text-slate-600 mb-1 text-red-500 font-bold">Thể tích chậu (Lít) *</label>
-                                <input type="number" id="p-pot-vol" step="0.1" value="5.0" class="w-full p-2 border border-slate-300 rounded text-sm border-red-200">
+                                <label class="block text-xs text-slate-600 mb-1 text-red-600 font-bold">Thể tích chậu (Lít) *</label>
+                                <input type="number" id="p-pot-vol" step="any" min="0.1" value="5.0" class="w-full p-2 border border-red-300 rounded text-sm bg-red-50">
                             </div>
                             <div id="div-soil-depth" class="hidden">
-                                <label class="block text-xs text-slate-600 mb-1 text-indigo-500 font-bold">Độ sâu vùng rễ ước tính (cm)</label>
-                                <input type="number" id="p-soil-depth" step="1" value="30" class="w-full p-2 border border-slate-300 rounded text-sm border-indigo-200">
+                                <label class="block text-xs text-slate-600 mb-1 text-indigo-600 font-bold">Độ sâu rễ hữu dụng (cm)</label>
+                                <input type="number" id="p-soil-depth" step="any" min="1" value="30" class="w-full p-2 border border-indigo-300 rounded text-sm bg-indigo-50">
                             </div>
                         </div>
                     </div>
 
                     <div class="border-t border-slate-100 pt-4 mt-2">
-                        <h4 class="text-sm font-semibold text-slate-800 mb-2">Chế độ & Tưới nhỏ giọt (Pulsed)</h4>
-                        <div class="grid grid-cols-2 gap-4 mb-3">
-                            <select id="p-mode" class="w-full p-2 border border-slate-300 rounded outline-none text-sm" onchange="document.getElementById('div-manual').classList.toggle('hidden', this.value === 'AI')">
-                                <option value="AI">🤖 AI Tự động</option>
-                                <option value="Manual">✋ Thủ công</option>
+                        <h4 class="text-sm font-semibold text-slate-800 mb-3">Hệ thống Điều khiển Bơm</h4>
+                        <div class="mb-3 p-3 border border-emerald-200 bg-emerald-50 rounded-lg">
+                            <label class="block text-xs font-bold text-emerald-800 mb-2">Chế độ vận hành chính</label>
+                            <select id="p-mode" class="w-full p-2 border border-emerald-300 rounded outline-none text-sm font-medium text-emerald-900" onchange="UI.toggleModeFields()">
+                                <option value="AI">🤖 AI Tự Động (Tối ưu hóa Field Capacity)</option>
+                                <option value="Manual">✋ Chỉ cho phép bơm Thủ Công</option>
                             </select>
-                            <div id="div-manual" class="hidden">
-                                <input type="number" id="p-manual-vol" placeholder="Lượng bơm tay max (L)" step="0.1" value="1.0" class="w-full p-2 border border-slate-300 rounded text-sm">
+                            
+                            <div id="div-ai-override" class="mt-3 flex items-center gap-2">
+                                <input type="checkbox" id="p-ai-allow-manual" class="w-4 h-4 rounded border-emerald-400 text-emerald-600 focus:ring-emerald-500 cursor-pointer" onchange="UI.toggleModeFields()">
+                                <label for="p-ai-allow-manual" class="text-xs text-emerald-700 cursor-pointer font-medium">Bật tính năng cho phép xả bơm thủ công ghi đè AI</label>
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs text-slate-600 mb-1">Max 1 Nhát bơm (Lít)</label>
-                                <input type="number" id="p-max-pulse" step="0.01" value="0.1" class="w-full p-2 border border-slate-300 rounded text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs text-slate-600 mb-1">Chờ ngấm giữa nhát (Giây)</label>
-                                <input type="number" id="p-pause-int" value="300" class="w-full p-2 border border-slate-300 rounded text-sm">
+
+                        <div id="div-manual-vol" class="hidden mb-4 p-3 border border-blue-200 bg-blue-50 rounded-lg">
+                            <label class="block text-xs text-blue-800 font-bold mb-1">Mức nước bơm mỗi lần nhấn thủ công (Lít)</label>
+                            <input type="number" id="p-manual-vol" step="any" value="1.0" class="w-full p-2 border border-blue-300 rounded text-sm text-blue-900 font-medium">
+                        </div>
+
+                        <div id="div-pulse-config" class="hidden bg-slate-100 p-3 rounded-lg border border-slate-200 mt-2">
+                            <p class="text-[10px] text-slate-500 mb-2 uppercase font-bold tracking-wider">Bảo vệ rễ (Cấu hình nhỏ giọt)</p>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[10px] md:text-xs text-slate-700 mb-1 font-medium">Mức chia nhỏ (Pulse - L)</label>
+                                    <input type="number" id="p-max-pulse" step="any" value="0.2" class="w-full p-1.5 md:p-2 border border-slate-300 rounded text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] md:text-xs text-slate-700 mb-1 font-medium">Nghỉ ngấm đất (Giây)</label>
+                                    <input type="number" id="p-pause-int" step="any" value="120" class="w-full p-1.5 md:p-2 border border-slate-300 rounded text-sm">
+                                </div>
                             </div>
                         </div>
                     </div>
                     
-                    <button type="submit" class="w-full mt-2 bg-emerald-600 text-white font-medium py-2.5 rounded hover:bg-emerald-700 transition shadow-lg">Lưu Cấu Hình</button>
+                    <button type="submit" class="w-full mt-4 bg-emerald-600 text-white font-bold text-base py-3 rounded-lg hover:bg-emerald-700 transition shadow-lg">LƯU THIẾT LẬP CÂY</button>
                 </form>
             </div>
         </div>
@@ -505,32 +494,30 @@
     <!-- Predict Report Modal -->
     <div id="modal-predict" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-indigo-50 shrink-0">
-                <h3 class="font-bold text-lg text-indigo-900">Báo Cáo Dự Đoán</h3>
-                <button onclick="document.getElementById('modal-predict').classList.add('hidden')" class="text-indigo-400 hover:text-indigo-600 text-xl">&times;</button>
+            <div class="px-4 md:px-6 py-3 md:py-4 border-b border-slate-100 flex justify-between items-center bg-indigo-50 shrink-0">
+                <h3 class="font-bold text-base md:text-lg text-indigo-900">Báo Cáo Dự Đoán Bốc Hơi</h3>
+                <button onclick="document.getElementById('modal-predict').classList.add('hidden')" class="text-indigo-400 hover:text-indigo-600 text-2xl leading-none">&times;</button>
             </div>
-            <div class="p-6">
+            <div class="p-4 md:p-6">
                 <div class="text-center mb-6">
-                    <p class="text-sm text-slate-500 mb-1">Mức độ ẩm dự kiến vào:</p>
-                    <p class="font-bold text-slate-800" id="pre-target-time">--</p>
+                    <p class="text-xs md:text-sm text-slate-500 mb-1">Mức ẩm dự kiến (không tính bơm) vào:</p>
+                    <p class="font-bold text-slate-800 text-sm md:text-base" id="pre-target-time">--</p>
                 </div>
                 
-                <div class="flex items-center justify-center mb-8">
-                    <div class="w-24 h-24 rounded-full border-4 border-indigo-100 flex items-center justify-center relative">
-                        <span id="pre-pct" class="text-3xl font-black text-indigo-600">--%</span>
+                <div class="flex items-center justify-center mb-6 md:mb-8">
+                    <div class="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-indigo-100 flex items-center justify-center relative bg-white shadow-inner">
+                        <span id="pre-pct" class="text-2xl md:text-3xl font-black text-indigo-600">--%</span>
                     </div>
                 </div>
 
-                <div class="bg-slate-50 rounded-lg p-4 text-sm space-y-2 border border-slate-100">
-                    <div class="flex justify-between"><span class="text-slate-500">Độ ẩm bắt đầu:</span><span id="pre-init" class="font-medium text-slate-700">--</span></div>
-                    <div class="flex justify-between"><span class="text-slate-500">Thất thoát bốc hơi:</span><span id="pre-evap" class="font-medium text-red-500">-- L</span></div>
-                    <div class="flex justify-between"><span class="text-slate-500">Mưa hấp thụ:</span><span id="pre-rain" class="font-medium text-blue-500">-- L</span></div>
+                <div class="bg-slate-50 rounded-lg p-3 md:p-4 text-xs md:text-sm space-y-2.5 border border-slate-200">
+                    <div class="flex justify-between items-center"><span class="text-slate-600">Độ ẩm thời điểm bắt đầu:</span><span id="pre-init" class="font-bold text-slate-800">--</span></div>
+                    <div class="flex justify-between items-center"><span class="text-slate-600">Tổng nước bốc hơi (ETc):</span><span id="pre-evap" class="font-bold text-red-500 bg-red-50 px-2 rounded">-- L</span></div>
+                    <div class="flex justify-between items-center"><span class="text-slate-600">Lượng mưa tự nhiên hứng:</span><span id="pre-rain" class="font-bold text-blue-600 bg-blue-50 px-2 rounded">-- L</span></div>
                 </div>
-                
-                <p class="text-xs text-slate-400 mt-4 text-center italic" id="pre-note">Dữ liệu tính toán từ Weather API và đặc tính loại đất.</p>
             </div>
             <div class="p-4 bg-slate-50 border-t border-slate-100">
-                <button onclick="document.getElementById('modal-predict').classList.add('hidden')" class="w-full bg-slate-800 text-white font-medium py-2 rounded">Đóng</button>
+                <button onclick="document.getElementById('modal-predict').classList.add('hidden')" class="w-full bg-slate-800 hover:bg-slate-700 transition text-white font-medium py-2 rounded-lg">Đóng</button>
             </div>
         </div>
     </div>
@@ -538,42 +525,46 @@
     <!-- Report Bug Modal -->
     <div id="modal-report" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col">
-            <div class="px-6 py-4 border-b border-amber-100 bg-amber-50 flex justify-between items-center shrink-0">
-                <h3 class="font-bold text-lg text-amber-900">Gửi Báo Lỗi Trực Tiếp</h3>
-                <button onclick="document.getElementById('modal-report').classList.add('hidden')" class="text-amber-500 hover:text-amber-700 text-xl">&times;</button>
+            <div class="px-4 md:px-6 py-3 md:py-4 border-b border-amber-200 bg-amber-50 flex justify-between items-center shrink-0 rounded-t-2xl">
+                <h3 class="font-bold text-base md:text-lg text-amber-900">Gửi Report Lỗi Trực Tiếp</h3>
+                <button onclick="document.getElementById('modal-report').classList.add('hidden')" class="text-amber-500 hover:text-amber-700 text-2xl leading-none">&times;</button>
             </div>
-            <div class="p-6">
+            <div class="p-4 md:p-6">
                 <form id="form-report" onsubmit="submitReport(event)" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-medium text-slate-700 mb-1">Tiêu đề lỗi *</label>
-                        <input type="text" id="r-title" required class="w-full p-2 border border-slate-300 rounded outline-none text-sm focus:border-amber-500" placeholder="VD: Bơm tràn nước chậu">
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Tiêu đề ngắn gọn *</label>
+                        <input type="text" id="r-title" required class="w-full p-2 md:p-2.5 border border-slate-300 rounded-lg outline-none text-sm focus:border-amber-500 focus:ring-1 focus:ring-amber-200" placeholder="VD: Bơm ảo, lượng nước không khớp">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-700 mb-1">Mô tả chi tiết *</label>
-                        <textarea id="r-desc" required rows="4" class="w-full p-2 border border-slate-300 rounded outline-none text-sm focus:border-amber-500" placeholder="Tôi thấy đất đã rất ẩm nhưng hệ thống vẫn tiếp tục báo cần tưới..."></textarea>
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Mô tả hiện tượng cụ thể *</label>
+                        <textarea id="r-desc" required rows="4" class="w-full p-2 md:p-2.5 border border-slate-300 rounded-lg outline-none text-sm focus:border-amber-500 focus:ring-1 focus:ring-amber-200" placeholder="Mô tả các bước dẫn đến lỗi..."></textarea>
                     </div>
-                    <div class="bg-slate-50 p-3 rounded text-xs text-slate-500 border border-slate-200">
-                        Hệ thống sẽ tự động ghim <span class="font-mono text-[10px] bg-white border p-0.5 rounded">PlantID</span> và trạng thái đất vào báo cáo gửi đi.
+                    <div class="bg-amber-50/50 p-3 rounded-lg text-xs text-amber-700 border border-amber-100 flex gap-2 items-start">
+                        <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Hệ thống sẽ đính kèm PlantID hiện tại để Dev check log dễ dàng.</span>
                     </div>
-                    <button type="submit" class="w-full bg-amber-500 text-white font-medium py-2.5 rounded hover:bg-amber-600 transition shadow-lg">Gửi Tới Admin</button>
+                    <button type="submit" class="w-full bg-amber-500 text-white font-bold py-2.5 rounded-lg hover:bg-amber-600 transition shadow-lg">Gửi Report</button>
                 </form>
             </div>
         </div>
     </div>
 
     <!-- Toast -->
-    <div id="toast" class="fixed bottom-4 right-4 bg-slate-800 text-white px-4 py-3 rounded shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-2">
+    <div id="toast" class="fixed bottom-4 right-4 bg-slate-800 text-white px-4 py-3 rounded-lg shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 z-[100] flex items-center gap-3">
         <span id="toast-msg" class="text-sm font-medium">Message</span>
     </div>
 
     <script>
         /* ==========================================
-           WARNING: prototype only - do not use in production
-           V4: Added datePlanted, soil_type mapping, explicit validation,
-           and robust anti-kill max irrigation limits.
+           Smart Irrigation V2
+           - Fixed Health NaN jumps (Strict Parsing)
+           - Dynamic Pulse calculation for extreme high speed (x3600)
+           - Target Field Capacity watering for AI
+           - Strict arbitrary decimal inputs (step="any") everywhere
+           - Enhanced Alert Types (Heat, Low warning)
+           - Auto-Revert / Time Machine functionality on 5-day limit
            ========================================== */
 
-        // --- 1. CORE DATA CONSTANTS & STATE ---
         const SOIL_PROPERTIES = {
             "sand": { field_capacity_pct: 10, wilting_point_pct: 4, porosity: 0.35 },
             "loam": { field_capacity_pct: 35, wilting_point_pct: 12, porosity: 0.45 },
@@ -592,19 +583,20 @@
                 intervalId: null,
                 multiplier: 1,      
                 virtualTime: Date.now(),
-                startTime: Date.now()
+                startTime: Date.now(),
+                snapshot: null 
             }
         };
 
         const SECRETS = { GATE_CODE: '28022026' };
         
-        // --- 2. UTILS ---
+        // --- UTILS ---
         const escapeHTML = str => str.replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag]));
         const showToast = (msg) => {
             const t = document.getElementById('toast');
             document.getElementById('toast-msg').innerText = msg;
             t.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 3000);
+            setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 4000);
         };
         const generateId = () => 'p_' + Math.random().toString(36).substr(2, 9);
         const formatTime = (ts) => {
@@ -612,7 +604,7 @@
             return d.toLocaleTimeString('vi-VN', {hour12: false, hour:'2-digit', minute:'2-digit'}) + ' ' + d.toLocaleDateString('vi-VN');
         };
 
-        // --- 3. WEATHER MANAGER (API Sync) ---
+        // --- WEATHER MANAGER ---
         const WeatherManager = {
             API_KEY: '3b0081f28b619b16e88c63e0dc813975',
             mode: 'normal',
@@ -627,12 +619,13 @@
                     this.forecastCache = data.list.map(item => ({
                         dt_ts: item.dt * 1000,
                         temp: item.main.temp,
+                        humidity: item.main.humidity || 70, 
                         rain: item.rain ? (item.rain['3h'] / 3 || 0) : 0, 
                         status: item.weather[0].description
                     }));
                     
                     this.mode = 'api_sync';
-                    showToast('Đã đồng bộ dự báo 5 ngày (OpenWeatherMap)');
+                    showToast('Đã đồng bộ API Dự báo 5 ngày (Huế)');
                     this.updateUI(state.sim.virtualTime);
                 } catch(e) { 
                     this.generateMockForecast();
@@ -647,13 +640,14 @@
                     let isDay = (hour >= 7 && hour <= 17);
                     this.forecastCache.push({
                         dt_ts: ts,
-                        temp: isDay ? (28 + Math.random()*5) : (23 + Math.random()*3),
-                        rain: Math.random() > 0.8 ? (Math.random()*5) : 0,
+                        temp: isDay ? (28 + Math.random()*4) : (23 + Math.random()*2),
+                        humidity: isDay ? (45 + Math.random()*20) : (75 + Math.random()*15),
+                        rain: Math.random() > 0.85 ? (Math.random()*4) : 0,
                         status: isDay ? "Trời nắng (Demo)" : "Đêm mát (Demo)"
                     });
                 }
                 this.mode = 'api_sync';
-                showToast('API Lỗi. Đang dùng dữ liệu giả lập (Demo)');
+                showToast('API Lỗi. Dùng dữ liệu giả lập (Demo)');
                 this.updateUI(state.sim.virtualTime);
             },
             setSim(type) {
@@ -661,21 +655,19 @@
                 this.updateUI(state.sim.virtualTime);
             },
             getWeatherForTimestamp(ts) {
-                if (this.mode === 'sun') return { temp: 38, rain: 0, status: 'Nắng gắt (Ép cứng)' };
-                if (this.mode === 'rain') return { temp: 24, rain: 15, status: 'Mưa to (Ép cứng)' };
-                if (this.mode === 'normal') return { temp: 28, rain: 0, status: 'Bình thường (Ép cứng)' };
+                if (this.mode === 'sun') return { temp: 37, humidity: 30, rain: 0, status: 'Nắng gắt (Ép cứng)' };
+                if (this.mode === 'rain') return { temp: 24, humidity: 95, rain: 2.5, status: 'Mưa to (Ép cứng)' }; 
+                if (this.mode === 'normal') return { temp: 28, humidity: 65, rain: 0, status: 'Bình thường (Ép cứng)' };
                 
-                if (this.forecastCache.length === 0) return { temp: 28, rain: 0, status: 'Đang tải...' };
+                if (this.forecastCache.length === 0) return { temp: 28, humidity: 60, rain: 0, status: 'Đang tải...' };
                 
                 let closest = this.forecastCache[0];
                 let minDiff = Math.abs(ts - closest.dt_ts);
-                
                 for(let i=1; i<this.forecastCache.length; i++) {
                     let diff = Math.abs(ts - this.forecastCache[i].dt_ts);
                     if(diff < minDiff) { minDiff = diff; closest = this.forecastCache[i]; }
                 }
-                
-                return { temp: closest.temp, rain: closest.rain, status: closest.status };
+                return { temp: closest.temp, humidity: closest.humidity, rain: closest.rain, status: closest.status };
             },
             updateUI(t_sim) {
                 const el = document.getElementById('lbl-weather-desc');
@@ -683,52 +675,17 @@
             }
         };
 
-        // --- 4. STORAGE WRAPPER & MIGRATION ---
+        // --- STORAGE ---
         const DB = {
             init() {
-                // Admin Seed
-                if (!localStorage.getItem('site_seeded_v4_admins')) {
+                if (!localStorage.getItem('site_seeded_v6_admins')) {
                     const admins = [
-                        { email: 'Kietvo2ktuankiet@gmail.com', password: 'Kietvo2ktuankiet@gmail.com', isAdmin: true, displayName: 'Kiet Vo', disabled: false, createdAt: new Date().toISOString() },
-                        { email: 'nhtlong11022009@gmail.com', password: 'nhtlong11022009@gmail.com', isAdmin: true, displayName: 'Long Nguyen', disabled: false, createdAt: new Date().toISOString() },
-                        { email: 'tranduydat2509@gmail.com', password: 'tranduydat2509@gmail.com', isAdmin: true, displayName: 'Dat Tran', disabled: false, createdAt: new Date().toISOString() }
+                        { email: 'Kietvo2ktuankiet@gmail.com', password: 'Kietvo2ktuankiet@gmail.com', isAdmin: true, displayName: 'Kiet Vo', disabled: false },
+                        { email: 'nhtlong11022009@gmail.com', password: 'nhtlong11022009@gmail.com', isAdmin: true, displayName: 'Long Nguyen', disabled: false },
+                        { email: 'tranduydat2509@gmail.com', password: 'tranduydat2509@gmail.com', isAdmin: true, displayName: 'Dat Tran', disabled: false }
                     ];
                     localStorage.setItem('users', JSON.stringify(admins));
-                    localStorage.setItem('site_seeded_v4_admins', 'true');
-                }
-
-                // V4 Schema Migration Script
-                if (!localStorage.getItem('v4_migration_done')) {
-                    try {
-                        const users = this.getUsers();
-                        users.forEach(u => {
-                            let plants = this.getPlants(u.email);
-                            let migrated = false;
-                            plants = plants.map(p => {
-                                if (p.plant_size || p.field_capacity_pct) {
-                                    migrated = true;
-                                    // Map old fields to new
-                                    p.soil_type = p.soil_type || 'loam';
-                                    if(!p.datePlanted) {
-                                        let defaultDays = p.plant_size === 'large' ? 1000 : (p.plant_size === 'small' ? 10 : 100);
-                                        let d = new Date(); d.setDate(d.getDate() - defaultDays);
-                                        p.datePlanted = d.toISOString().split('T')[0];
-                                    }
-                                    if(typeof p.root_zone_volume_l === 'undefined') {
-                                        p.root_zone_volume_l = p.locationType === 'in_pot' ? (p.pot_volume_l || 5) : ((p.pot_area_m2 || 0.05) * 100 * 5);
-                                    }
-                                    // Delete old deprecated schema keys
-                                    delete p.plant_size;
-                                    delete p.field_capacity_pct;
-                                    delete p.wilting_point_pct;
-                                }
-                                return p;
-                            });
-                            if (migrated) this.savePlants(u.email, plants);
-                        });
-                        localStorage.setItem('v4_migration_done', 'true');
-                        console.log("Migration to V4 completed.");
-                    } catch(e) { console.error("Migration failed:", e); }
+                    localStorage.setItem('site_seeded_v6_admins', 'true');
                 }
             },
             getUsers() { return JSON.parse(localStorage.getItem('users') || '[]'); },
@@ -740,30 +697,22 @@
             
             getReports() { return JSON.parse(localStorage.getItem('reports') || '[]'); },
             addReport(report) {
-                let reps = this.getReports();
-                reps.unshift(report);
-                localStorage.setItem('reports', JSON.stringify(reps));
+                let reps = this.getReports(); reps.unshift(report); localStorage.setItem('reports', JSON.stringify(reps));
                 const admins = this.getUsers().filter(u => u.isAdmin);
                 admins.forEach(a => {
                     let inbox = JSON.parse(localStorage.getItem(`admin_inbox_${a.email}`) || '[]');
-                    inbox.unshift(report.id);
-                    localStorage.setItem(`admin_inbox_${a.email}`, JSON.stringify(inbox));
+                    inbox.unshift(report.id); localStorage.setItem(`admin_inbox_${a.email}`, JSON.stringify(inbox));
                     let count = parseInt(localStorage.getItem(`admin_unread_${a.email}`) || '0');
                     localStorage.setItem(`admin_unread_${a.email}`, count + 1);
                 });
             },
             resolveReport(reportId, reply) {
-                let reps = this.getReports();
-                let r = reps.find(x => x.id === reportId);
-                if(r) {
-                    r.status = 'resolved';
-                    r.reply = reply;
-                    localStorage.setItem('reports', JSON.stringify(reps));
-                }
+                let reps = this.getReports(); let r = reps.find(x => x.id === reportId);
+                if(r) { r.status = 'resolved'; r.reply = reply; localStorage.setItem('reports', JSON.stringify(reps)); }
             }
         };
 
-        // --- 5. AUTH & ROUTING ---
+        // --- AUTH & ROUTING ---
         const Auth = {
             checkSession() {
                 const loggedEmail = sessionStorage.getItem('session_currentUser');
@@ -779,7 +728,6 @@
                 const user = DB.getUser(email);
                 if (!user) return showToast('Tài khoản không tồn tại!');
                 if (user.password !== document.getElementById('login-pass').value) return showToast('Sai mật khẩu!'); 
-
                 sessionStorage.setItem('session_currentUser', user.email);
                 state.currentUser = user;
                 Router.navigate('dashboard');
@@ -789,7 +737,6 @@
                 const email = document.getElementById('reg-email').value.trim();
                 let users = DB.getUsers();
                 if (users.find(u => u.email === email)) return showToast('Email đã tồn tại!');
-
                 const newUser = { email, password: document.getElementById('reg-pass').value, isAdmin: false, displayName: document.getElementById('reg-name').value.trim(), disabled: false };
                 users.push(newUser); DB.saveUsers(users); DB.savePlants(email, []); 
                 sessionStorage.setItem('session_currentUser', email);
@@ -812,7 +759,6 @@
                 if (['dashboard', 'plant', 'admin'].includes(viewId)) {
                     nav.classList.remove('hidden');
                     document.getElementById('nav-user-name').innerText = escapeHTML(state.currentUser.displayName);
-                    
                     const btnAdmin = document.getElementById('btn-admin-panel');
                     if(state.currentUser.isAdmin) {
                         btnAdmin.classList.remove('hidden');
@@ -836,7 +782,7 @@
             }
         };
 
-        // --- 6. UI MANAGER ---
+        // --- UI MANAGER ---
         const UI = {
             switchAuthTab(tab) {
                 document.getElementById('form-login').classList.toggle('hidden', tab !== 'login');
@@ -849,26 +795,33 @@
                 document.getElementById('empty-state').classList.toggle('hidden', plants.length > 0);
                 
                 plants.forEach(p => {
-                    const hColor = (p.health > 70) ? 'text-blue-500' : (p.health > 40 ? 'text-amber-500' : 'text-red-500');
+                    let strictHealth = parseFloat(p.health);
+                    if(isNaN(strictHealth)) strictHealth = 100;
+
+                    const hColor = (strictHealth > 70) ? 'text-blue-500' : (strictHealth > 40 ? 'text-amber-500' : 'text-red-500');
+                    let icon = '🌱';
+                    if(p.plantType === 'Tree') icon = '🌳';
+                    else if (p.plantType === 'Ornamental') icon = '🌵';
+                    else if (p.plantType === 'Tomato') icon = '🍅';
+
                     list.innerHTML += `
-                        <div class="relative bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition cursor-pointer" onclick="Router.navigate('plant', {id: '${p.plantId}'})">
+                        <div class="relative bg-white rounded-2xl border border-slate-200 p-4 md:p-5 shadow-sm hover:shadow-md transition cursor-pointer flex flex-col" onclick="Router.navigate('plant', {id: '${p.plantId}'})">
                             <div class="flex justify-between items-start mb-3">
-                                <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">🌱</div>
+                                <div class="w-10 h-10 md:w-12 md:h-12 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center font-bold text-xl md:text-2xl shadow-inner">${icon}</div>
                                 <div class="text-right">
-                                    <span class="text-xs font-medium px-2 py-1 bg-slate-100 rounded block mb-1">${escapeHTML(p.plantType)}</span>
-                                    <span class="text-[10px] font-bold ${hColor}">Máu: ${Math.round(p.health || 100)}%</span>
+                                    <span class="text-[10px] md:text-xs font-medium px-2 py-1 bg-slate-100 rounded block mb-1">${escapeHTML(p.plantType)}</span>
+                                    <span class="text-[10px] font-bold ${hColor}">Sức khỏe: ${Math.round(strictHealth)}%</span>
                                 </div>
                             </div>
-                            <h3 class="font-bold text-lg text-slate-800">${escapeHTML(p.displayName)}</h3>
-                            <div class="w-full bg-slate-100 rounded-full h-2 mb-1 mt-3">
-                                <div class="bg-emerald-500 h-2 rounded-full" style="width: ${p.current_soil_moisture}%"></div>
+                            <h3 class="font-bold text-base md:text-lg text-slate-800 line-clamp-1">${escapeHTML(p.displayName)}</h3>
+                            <div class="w-full bg-slate-100 rounded-full h-1.5 md:h-2 mb-1 mt-auto pt-3">
+                                <div class="bg-emerald-500 h-1.5 md:h-2 rounded-full transition-all" style="width: ${p.current_soil_moisture}%"></div>
                             </div>
-                            <p class="text-xs text-slate-400 text-right">Đất: ${p.current_soil_moisture.toFixed(1)}%</p>
+                            <p class="text-[10px] md:text-xs text-slate-400 text-right font-medium">Đất: ${p.current_soil_moisture.toFixed(1)}%</p>
                         </div>
                     `;
                 });
                 
-                // Strict 3 plants limit validation
                 if(plants.length >= 3) {
                     document.getElementById('btn-add-plant').disabled = true;
                     document.getElementById('btn-add-plant').classList.add('opacity-50', 'cursor-not-allowed');
@@ -884,6 +837,16 @@
                 document.getElementById('div-pot-vol').classList.toggle('hidden', !isPot);
                 document.getElementById('div-soil-depth').classList.toggle('hidden', isPot);
             },
+            toggleModeFields() {
+                const mode = document.getElementById('p-mode').value;
+                const allowManual = document.getElementById('p-ai-allow-manual').checked;
+                
+                document.getElementById('div-manual-vol').classList.toggle('hidden', mode === 'AI');
+                document.getElementById('div-ai-override').classList.toggle('hidden', mode !== 'AI');
+                
+                const showPulse = mode === 'Manual' || (mode === 'AI' && allowManual);
+                document.getElementById('div-pulse-config').classList.toggle('hidden', !showPulse);
+            },
             openPlantModal(plantId = null) {
                 const plants = DB.getPlants(state.currentUser.email);
                 if (!plantId && plants.length >= 3) return showToast('Bạn đã đạt giới hạn 3 cây.');
@@ -891,16 +854,14 @@
                 document.getElementById('modal-plant-title').innerText = plantId ? 'Cấu hình lại cây' : 'Thêm cây mới';
                 document.getElementById('form-plant').reset();
                 document.getElementById('p-id').value = plantId || '';
-                
-                // Set default date = today
                 document.getElementById('p-date').value = new Date().toISOString().split('T')[0];
-                this.toggleLocFields();
-
+                
                 if (plantId) {
                     const p = DB.getPlant(state.currentUser.email, plantId);
                     if(p) {
                         document.getElementById('p-name').value = p.displayName;
                         document.getElementById('p-type').value = p.plantType;
+                        document.getElementById('p-size').value = p.plant_size || 'medium';
                         if(p.datePlanted) document.getElementById('p-date').value = p.datePlanted;
                         document.getElementById('p-soil-init').value = p.current_soil_moisture;
                         document.getElementById('p-loc-type').value = p.locationType || 'in_pot';
@@ -910,14 +871,15 @@
                         if(p.locationType === 'in_pot') document.getElementById('p-pot-vol').value = p.pot_volume_l || 5;
                         else document.getElementById('p-soil-depth').value = p.soil_depth_cm || 30;
                         
-                        document.getElementById('p-mode').value = p.settings.mode;
-                        document.getElementById('p-manual-vol').value = p.settings.manualVolume || 2.0;
+                        document.getElementById('p-mode').value = p.settings.mode || 'AI';
+                        document.getElementById('p-ai-allow-manual').checked = !!p.settings.allowManualOverride;
+                        document.getElementById('p-manual-vol').value = p.settings.manualVolume || 1.0;
                         document.getElementById('p-max-pulse').value = p.settings.maxPulseL || 0.1;
                         document.getElementById('p-pause-int').value = p.settings.pauseIntervalSec || 300;
-                        document.getElementById('div-manual').classList.toggle('hidden', p.settings.mode === 'AI');
-                        this.toggleLocFields();
                     }
                 }
+                this.toggleLocFields();
+                this.toggleModeFields();
                 document.getElementById('modal-plant').classList.remove('hidden');
             },
             closePlantModal() { document.getElementById('modal-plant').classList.add('hidden'); },
@@ -930,65 +892,76 @@
                 document.getElementById('pd-type-tag').innerText = p.plantType;
                 document.getElementById('pd-loc-tag').innerText = p.locationType === 'in_pot' ? 'Trong chậu' : 'Trên đất';
                 document.getElementById('pd-age-tag').innerText = `${p.age_days || 0} Ngày tuổi`;
-                document.getElementById('lbl-mode').innerText = p.settings.mode === 'AI' ? 'Tự động' : 'Thủ công';
+                document.getElementById('lbl-mode').innerText = p.settings.mode === 'AI' ? 'Tự động (AI)' : 'Thủ công';
                 
                 let limitL = p.root_zone_volume_l * 0.2;
                 document.getElementById('ai-soil-type').innerText = p.soil_type || 'Loam';
-                document.getElementById('ai-root-vol').innerText = `${p.root_zone_volume_l.toFixed(1)} Lít`;
-                document.getElementById('ai-safe-max').innerText = `${limitL.toFixed(2)} Lít / lần`;
+                document.getElementById('ai-root-vol').innerText = `${p.root_zone_volume_l.toFixed(2)} Lít`;
+                document.getElementById('ai-safe-max').innerText = `${limitL.toFixed(2)} L/lần`;
 
                 this.updatePlantVisuals(p, WeatherManager.getWeatherForTimestamp(state.sim.virtualTime));
                 this.renderLogs(p.irrigation_log);
                 this.renderAlerts(p);
             },
+            generatePlantSVG(p) {
+                let strictHealth = parseFloat(p.health);
+                if(isNaN(strictHealth)) strictHealth = 100;
+
+                let scale = p.plant_size === 'small' ? 0.7 : (p.plant_size === 'large' ? 1.3 : 1);
+                let color = strictHealth < 40 ? '#f87171' : (p.current_soil_moisture < 20 || p.current_soil_moisture > 85 ? '#fbbf24' : '#4ade80');
+                
+                let paths = '';
+                if(p.plantType === 'Tree') {
+                    paths = `<path d="M45,100 L55,100 L55,40 L45,40 Z" fill="#8B4513" /><circle cx="50" cy="30" r="35" fill="${color}" opacity="0.95" />`;
+                } else if (p.plantType === 'Ornamental') {
+                    paths = `<ellipse cx="50" cy="60" rx="18" ry="40" fill="${color}" /><path d="M50,20 L50,100 M35,60 L65,60" stroke="#fff" stroke-width="1.5" opacity="0.4"/>`;
+                } else if (p.plantType === 'Lettuce') {
+                    paths = `<path d="M50,100 Q15,60 25,30 Q50,60 50,100 Z" fill="${color}" /><path d="M50,100 Q85,60 75,30 Q50,60 50,100 Z" fill="${color}" /><path d="M50,100 Q30,50 50,15 Q70,50 50,100 Z" fill="${color}" opacity="0.8"/>`;
+                } else {
+                    // Tomato
+                    paths = `<path d="M 50 100 Q 40 60 50 20" fill="none" stroke="#22c55e" stroke-width="4" /><path d="M 48 70 Q 20 60 30 40 Q 40 50 48 70 Z" fill="${color}" /><path d="M 49 45 Q 80 30 70 10 Q 60 25 49 45 Z" fill="${color}" />`;
+                    if(p.plantType === 'Tomato') paths += `<circle cx="35" cy="55" r="6" fill="#ef4444" /><circle cx="65" cy="35" r="7" fill="#ef4444" />`;
+                }
+                return `<g transform="translate(50, 100) scale(${scale}) translate(-50, -100)">${paths}</g>`;
+            },
             updatePlantVisuals(p, weatherObj) {
                 const m = p.current_soil_moisture;
                 const sp = SOIL_PROPERTIES[p.soil_type || 'loam'];
                 
-                // Hero Status Logic based on actual soil properties
-                let statusMsg = "Tuyệt vời";
-                let statusClass = "bg-emerald-500/20 text-emerald-300 border-emerald-500/30";
-                let numColor = "text-emerald-400";
-                
-                if (m < sp.wilting_point_pct + 5) {
-                    statusMsg = "Nguy kịch (Khô héo)"; statusClass = "bg-red-500/20 text-red-300 border-red-500/30"; numColor = "text-red-400 text-glow-red";
-                } else if (m > sp.field_capacity_pct * 1.5) {
-                    statusMsg = "Cảnh báo (Úng nước)"; statusClass = "bg-amber-500/20 text-amber-300 border-amber-500/30"; numColor = "text-amber-400 text-glow-amber";
-                }
+                // Hero Status
+                let statusMsg = "Tuyệt vời"; let statusClass = "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"; let numColor = "text-emerald-400 text-glow";
+                if (m < sp.wilting_point_pct + 2) { statusMsg = "Nguy kịch (Khô héo)"; statusClass = "bg-red-500/20 text-red-300 border-red-500/30"; numColor = "text-red-400 text-glow-red"; }
+                else if (m < sp.field_capacity_pct * 0.5) { statusMsg = "Cảnh báo (Thiếu nước)"; statusClass = "bg-amber-500/20 text-amber-300 border-amber-500/30"; numColor = "text-amber-400 text-glow-amber"; }
+                else if (m > sp.field_capacity_pct * 1.5) { statusMsg = "Cảnh báo (Dư nước)"; statusClass = "bg-amber-500/20 text-amber-300 border-amber-500/30"; numColor = "text-amber-400 text-glow-amber"; }
 
-                document.getElementById('hero-moisture-val').innerText = m.toFixed(1) + '%';
-                document.getElementById('hero-moisture-val').className = `text-6xl md:text-8xl font-black tracking-tighter ${numColor} ${numColor.includes('glow') ? numColor : 'text-glow'}`;
-                
-                let hBadge = document.getElementById('hero-status-badge');
-                hBadge.className = `px-3 py-1 rounded-full text-sm font-bold border ${statusClass}`;
-                hBadge.innerText = statusMsg;
-                
+                document.getElementById('hero-moisture-val').innerText = m.toFixed(2) + '%';
+                document.getElementById('hero-moisture-val').className = `text-5xl sm:text-6xl md:text-8xl font-black tracking-tighter ${numColor}`;
+                let hBadge = document.getElementById('hero-status-badge'); hBadge.className = `px-3 py-1 mt-2 sm:mt-0 rounded-full text-xs md:text-sm font-bold border ${statusClass}`; hBadge.innerText = statusMsg;
                 document.getElementById('hero-updated-at').innerText = formatTime(p.last_sample_ts);
 
-                // Small Visual UI
                 document.getElementById('visual-temp').innerText = weatherObj.temp.toFixed(1);
-                const locPath = document.getElementById('svg-loc');
-                const locTop = document.getElementById('svg-loc-top');
-                if (p.locationType === 'in_soil') {
-                    locPath.setAttribute('d', 'M 0 100 L 100 100 L 100 150 L 0 150 Z'); locPath.setAttribute('fill', '#8B4513');
-                    locTop.setAttribute('fill', 'transparent');
-                } else {
-                    locPath.setAttribute('d', 'M 20 100 L 80 100 L 70 140 L 30 140 Z'); locPath.setAttribute('fill', '#475569');
-                    locTop.setAttribute('fill', '#334155');
-                }
+                document.getElementById('visual-humidity').innerText = weatherObj.humidity.toFixed(0);
+                
+                const locPath = document.getElementById('svg-loc'); const locTop = document.getElementById('svg-loc-top');
+                if (p.locationType === 'in_soil') { locPath.setAttribute('d', 'M 0 100 L 100 100 L 100 150 L 0 150 Z'); locPath.setAttribute('fill', '#8B4513'); locTop.setAttribute('fill', 'transparent'); }
+                else { locPath.setAttribute('d', 'M 20 100 L 80 100 L 70 140 L 30 140 Z'); locPath.setAttribute('fill', '#475569'); locTop.setAttribute('fill', '#334155'); }
 
-                const h = p.health || 100;
-                document.getElementById('pb-health-text').innerText = h.toFixed(0) + '%';
-                document.getElementById('pb-health-fill').style.width = h + '%';
-                document.getElementById('pb-health-fill').className = `h-2.5 rounded-full transition-all duration-500 ${h > 70 ? 'bg-blue-500' : (h > 40 ? 'bg-amber-500' : 'bg-red-500')}`;
-                document.getElementById('health-status-text').innerHTML = `Trạng thái: <b>${p.stressReason || 'Tốt'}</b>`;
+                document.getElementById('svg-plant-group').innerHTML = this.generatePlantSVG(p);
+
+                let strictHealth = parseFloat(p.health);
+                if(isNaN(strictHealth)) strictHealth = 100;
+                
+                document.getElementById('pb-health-text').innerText = strictHealth.toFixed(1) + '%';
+                document.getElementById('pb-health-fill').style.width = strictHealth + '%';
+                document.getElementById('pb-health-fill').className = `h-2.5 rounded-full transition-all duration-500 ${strictHealth > 70 ? 'bg-blue-500' : (strictHealth > 40 ? 'bg-amber-500' : 'bg-red-500')}`;
+                document.getElementById('health-status-text').innerHTML = `Lý do: <b>${escapeHTML(p.stressReason || 'Tốt')}</b>`;
 
                 document.getElementById('sim-time').innerText = formatTime(state.sim.virtualTime);
-                WeatherManager.updateUI(state.sim.virtualTime);
+                document.getElementById('pd-age-tag').innerText = `${p.age_days || 0} Ngày tuổi`;
 
                 const pStat = document.getElementById('pulsed-status');
                 if (p.waterQueue && p.waterQueue.active) {
-                    pStat.classList.remove('hidden'); pStat.innerText = `Bơm nhỏ giọt... Còn ${p.waterQueue.remainingL.toFixed(2)}L`;
+                    pStat.classList.remove('hidden'); pStat.innerText = `Bơm nhỏ giọt... Còn ${p.waterQueue.remainingL.toFixed(3)}L`;
                 } else pStat.classList.add('hidden');
             },
             renderAlerts(p) {
@@ -998,50 +971,66 @@
                 unack.forEach(a => {
                     const color = a.level.includes('critical') ? 'bg-red-50 text-red-800 border-red-200' : 'bg-amber-50 text-amber-800 border-amber-200';
                     panel.innerHTML += `
-                        <div class="flex justify-between items-center p-3 rounded-lg border ${color} shadow-sm text-sm">
-                            <div><span class="font-bold mr-2">Cảnh báo (${formatTime(a.ts)}):</span> ${a.msg}</div>
-                            <button onclick="ackAlert('${p.plantId}', ${a.ts})" class="px-3 py-1 bg-white rounded border shadow-sm hover:bg-slate-50 text-xs font-bold">Xác nhận</button>
+                        <div class="flex justify-between items-center p-3 rounded-lg border ${color} shadow-sm text-xs md:text-sm">
+                            <div><span class="font-bold mr-2">Cảnh báo (${formatTime(a.ts)}):</span> ${escapeHTML(a.msg)}</div>
+                            <button onclick="ackAlert('${p.plantId}', ${a.ts})" class="px-2 py-1 md:px-3 md:py-1 bg-white rounded border shadow-sm hover:bg-slate-50 text-[10px] md:text-xs font-bold">Đã hiểu</button>
                         </div>`;
                 });
             },
             updateAIAnalytics(decision) {
                 const dText = document.getElementById('ai-decision-text');
-                if (decision.isLocked) dText.innerHTML = `<span class="text-red-500 font-bold">Block (Quá ướt)</span>`;
-                else if (decision.willIrrigate) dText.innerHTML = `<span class="text-emerald-600 font-bold">Bơm: ${decision.volumeToApply.toFixed(2)}L</span>`;
-                else dText.innerHTML = `<span class="text-slate-500">Giữ nguyên</span>`;
+                if (decision.isLocked) dText.innerHTML = `<span class="text-red-500 font-bold">Khóa (Đất ướt)</span>`;
+                else if (decision.willIrrigate) dText.innerHTML = `<span class="text-emerald-600 font-bold">Kích Bơm: ${decision.volumeToApply.toFixed(3)}L</span>`;
+                else dText.innerHTML = `<span class="text-slate-500">Standby (Đủ ẩm)</span>`;
             },
             renderLogs(logs) {
                 const tbody = document.getElementById('log-tbody');
                 tbody.innerHTML = '';
                 (logs||[]).slice(0, 10).forEach(l => {
-                    tbody.innerHTML += `<tr class="hover:bg-slate-50"><td class="px-6 py-2 border-b border-slate-100">${formatTime(l.ts)}</td><td class="px-6 py-2 font-medium text-blue-600 border-b border-slate-100">+${l.volume_l} Lít</td><td class="px-6 py-2 border-b border-slate-100"><span class="px-2 py-1 text-[10px] font-bold rounded bg-slate-100 text-slate-700 uppercase tracking-wider">${l.reason}</span></td></tr>`;
+                    tbody.innerHTML += `<tr class="hover:bg-slate-50 transition-colors"><td class="px-4 md:px-6 py-2 md:py-3 border-b border-slate-100">${formatTime(l.ts)}</td><td class="px-4 md:px-6 py-2 md:py-3 font-bold text-blue-600 border-b border-slate-100">+${parseFloat(l.volume_l).toFixed(3)}L</td><td class="px-4 md:px-6 py-2 md:py-3 border-b border-slate-100"><span class="px-2 py-1 text-[9px] md:text-[10px] font-bold rounded bg-slate-100 text-slate-600 uppercase tracking-wider">${escapeHTML(l.reason)}</span></td></tr>`;
                 });
             },
-            openReportModal() {
-                document.getElementById('form-report').reset();
-                document.getElementById('modal-report').classList.remove('hidden');
-            }
+            openReportModal() { document.getElementById('form-report').reset(); document.getElementById('modal-report').classList.remove('hidden'); }
         };
 
-        // --- 7. ALGORITHMS & SIMULATION ---
+        // --- ALGORITHMS & SIMULATION ---
         function computeIrrigationDecision(soilPct, p, weather) {
-            const ET0 = Math.max(1, weather.temp * 0.15); 
-            const ETc_mm_day = ET0 * p.Kc;
-            const effectiveRain = weather.rain * (p.locationType==='in_pot'?0.5:0.8); 
+            const T = parseFloat(weather.temp);
+            const H = parseFloat(weather.humidity);
+            
+            // Advanced ET0 with extreme heat scaling
+            let ET0 = Math.max(0.5, (T * 0.15) * (1 - (H / 150))); 
+            if (T > 30) ET0 *= 1.3;
+            if (T > 35) ET0 *= 1.5; // Extreme evaporation
+
+            let adjustedKc = parseFloat(p.Kc) || 0.9;
+            const ETc_mm_day = ET0 * adjustedKc;
+            
+            const rainEff = p.locationType === 'in_pot' ? 0.4 : 0.8; // Pots catch less rain natively
+            const effectiveRain = parseFloat(weather.rain) * rainEff; 
+            
             const needed_mm = Math.max(0, ETc_mm_day - effectiveRain);
-            const needed_L = needed_mm * p.pot_area_m2; 
-            
+            // Current deficit logic
             const sp = SOIL_PROPERTIES[p.soil_type || 'loam'];
-            const isLocked = soilPct >= (sp.field_capacity_pct * 1.2); // Lock if exceeding field cap significantly
+            const targetPct = sp.field_capacity_pct; // We want to pump up to Field Capacity
             
-            // ANTI-KILL RULE: max 20% of root zone volume
-            const absoluteMaxL = p.root_zone_volume_l * 0.2; 
-            const willIrrigate = (p.settings.mode === 'AI' && soilPct < sp.field_capacity_pct && !isLocked && needed_L > 0.05);
+            let needed_L = 0;
+            // Only calculate needed_L if we are below target
+            if (soilPct < targetPct) {
+                 needed_L = ((targetPct - soilPct) / 100) * parseFloat(p.root_zone_volume_l);
+            }
+
+            const isLocked = soilPct >= (sp.field_capacity_pct * 1.2); 
+            const absoluteMaxL = parseFloat(p.root_zone_volume_l) * 0.2; 
+            
+            // AI triggers ONLY if soil drops below 60% of field capacity, to avoid constantly trickling water
+            const triggerThreshold = sp.field_capacity_pct * 0.6;
+            const willIrrigate = (p.settings.mode === 'AI' && soilPct < triggerThreshold && !isLocked && needed_L > 0.01);
             
             let volumeToApply = willIrrigate ? needed_L : 0;
-            volumeToApply = Math.min(volumeToApply, absoluteMaxL);
+            volumeToApply = Math.min(volumeToApply, absoluteMaxL); // Safety cap
             
-            return { ET0, Kc: p.Kc, ETc_mm_day, needed_L, willIrrigate, volumeToApply, isLocked };
+            return { ET0, Kc: adjustedKc, ETc_mm_day, needed_L, willIrrigate, volumeToApply, isLocked };
         }
 
         const Predictor = {
@@ -1054,35 +1043,34 @@
                 const now = state.sim.virtualTime;
                 
                 if (targetTs <= now) return showToast('Vui lòng chọn thời gian trong tương lai.');
-                if (targetTs > now + 5 * 24 * 3600 * 1000) return showToast('Hệ thống chỉ hỗ trợ dự đoán tối đa 5 ngày (120 giờ) tới!');
+                if (targetTs > now + 5 * 24 * 3600 * 1000) return showToast('Chỉ hỗ trợ dự đoán tối đa 5 ngày (120 giờ)!');
 
-                // Initialize state from plant
-                let currentWaterL = p.root_zone_volume_l * (p.current_soil_moisture / 100);
+                let currentWaterL = parseFloat(p.root_zone_volume_l) * (parseFloat(p.current_soil_moisture) / 100);
                 let t = now;
                 let totalEvapL = 0; let totalRainL = 0;
 
-                // Step simulation by 1 hour
                 while(t < targetTs) {
                     let w = WeatherManager.getWeatherForTimestamp(t);
-                    let ET0 = Math.max(1, w.temp * 0.15);
-                    let ETc_mm_hour = (ET0 * p.Kc) / 24;
-                    let evapL = ETc_mm_hour * p.pot_area_m2;
-                    
-                    let rainEff = p.locationType === 'in_pot' ? 0.5 : 0.8;
-                    let rainL = (w.rain || 0) * p.pot_area_m2 * rainEff;
+                    let ET0 = Math.max(0.5, (w.temp * 0.15) * (1 - (w.humidity / 150)));
+                    if (w.temp > 30) ET0 *= 1.3;
+                    if (w.temp > 35) ET0 *= 1.5;
+
+                    let ETc_mm_hour = (ET0 * parseFloat(p.Kc)) / 24;
+                    let evapL = ETc_mm_hour * parseFloat(p.pot_area_m2);
+                    let rainL = (parseFloat(w.rain) || 0) * parseFloat(p.pot_area_m2) * (p.locationType === 'in_pot' ? 0.4 : 0.8);
 
                     currentWaterL = Math.max(0, currentWaterL + rainL - evapL);
                     totalEvapL += evapL; totalRainL += rainL;
                     t += 3600000;
                 }
 
-                let predictedPct = Math.min(100, (currentWaterL / p.root_zone_volume_l) * 100);
+                let predictedPct = Math.min(100, (currentWaterL / parseFloat(p.root_zone_volume_l)) * 100);
 
                 document.getElementById('pre-target-time').innerText = formatTime(targetTs);
-                document.getElementById('pre-pct').innerText = predictedPct.toFixed(1) + '%';
-                document.getElementById('pre-init').innerText = p.current_soil_moisture.toFixed(1) + '%';
-                document.getElementById('pre-evap').innerText = `-${totalEvapL.toFixed(2)} L`;
-                document.getElementById('pre-rain').innerText = `+${totalRainL.toFixed(2)} L`;
+                document.getElementById('pre-pct').innerText = predictedPct.toFixed(2) + '%';
+                document.getElementById('pre-init').innerText = parseFloat(p.current_soil_moisture).toFixed(2) + '%';
+                document.getElementById('pre-evap').innerText = `-${totalEvapL.toFixed(3)} L`;
+                document.getElementById('pre-rain').innerText = `+${totalRainL.toFixed(3)} L`;
                 
                 document.getElementById('modal-predict').classList.remove('hidden');
             }
@@ -1093,6 +1081,9 @@
                 if (this.intervalId) clearInterval(this.intervalId);
                 state.sim.virtualTime = Date.now(); 
                 state.sim.startTime = state.sim.virtualTime;
+                // BACKUP SNAPSHOT for Revert
+                state.sim.snapshot = JSON.stringify(DB.getPlants(state.currentUser.email));
+
                 this.intervalId = setInterval(() => this.tick(), 1000); 
             },
             stop() { if (this.intervalId) clearInterval(this.intervalId); },
@@ -1105,10 +1096,16 @@
                 const virtualMsPassed = tickRealMs * state.sim.multiplier;
                 state.sim.virtualTime += virtualMsPassed;
 
+                // 5-DAY LIMIT -> TIME MACHINE REVERT
                 if (state.sim.virtualTime - state.sim.startTime > 5 * 24 * 3600 * 1000) {
+                    this.stop();
+                    DB.savePlants(state.currentUser.email, JSON.parse(state.sim.snapshot)); // Revert Data
                     state.sim.multiplier = 1; document.getElementById('sim-speed').value = "1";
-                    state.sim.startTime = state.sim.virtualTime; 
-                    showToast('Đã chạm ngưỡng giả lập 5 ngày. Đã chặn và reset về x1.');
+                    state.sim.virtualTime = Date.now();
+                    alert('⏳ HẾT PHIÊN GIẢ LẬP: Đã đạt mốc 5 ngày tương lai. Hệ thống vừa tự động hoàn tác (Time Machine) đưa cây về trạng thái chuẩn của thời điểm hiện tại để bảo đảm dữ liệu thực tế.');
+                    if (state.currentView === 'plant') UI.renderPlantDetail(state.currentPlantId);
+                    else UI.renderDashboard();
+                    return; 
                 }
 
                 let plants = DB.getPlants(state.currentUser.email);
@@ -1117,66 +1114,91 @@
                 const hoursPassed = virtualMsPassed / 3600000;
 
                 plants.forEach(p => {
-                    // Update age mathematically correctly (not UI dependent)
+                    // Force rigorous numeric types to kill NaN bugs
+                    p.current_soil_moisture = parseFloat(p.current_soil_moisture);
+                    if(isNaN(p.current_soil_moisture)) p.current_soil_moisture = 50;
+                    
+                    p.root_zone_volume_l = parseFloat(p.root_zone_volume_l) || 5;
+                    p.pot_area_m2 = parseFloat(p.pot_area_m2) || 0.05;
+                    p.Kc = parseFloat(p.Kc) || 0.9;
+
                     if(p.datePlanted) {
-                        p.age_days = Math.floor((state.sim.virtualTime - new Date(p.datePlanted).getTime()) / (1000 * 60 * 60 * 24));
+                        p.age_days = Math.floor((state.sim.virtualTime - new Date(p.datePlanted).getTime()) / 86400000);
+                        if (p.age_days < 0) p.age_days = 0;
                     }
 
-                    // Water Balance calculation
+                    // Evaporation Math
                     let waterL = p.root_zone_volume_l * (p.current_soil_moisture / 100);
-                    let ET0 = Math.max(1, weather.temp * 0.15);
+                    let ET0 = Math.max(0.5, (weather.temp * 0.15) * (1 - (weather.humidity / 150)));
+                    if (weather.temp > 30) ET0 *= 1.3;
+                    if (weather.temp > 35) ET0 *= 1.5;
+
                     let evapL = (ET0 * p.Kc / 24) * p.pot_area_m2 * hoursPassed;
-                    let rainEff = p.locationType === 'in_pot' ? 0.5 : 0.8;
-                    let rainL = weather.rain * p.pot_area_m2 * rainEff * hoursPassed;
+                    let rainEff = p.locationType === 'in_pot' ? 0.4 : 0.8;
+                    let rainL = parseFloat(weather.rain) * p.pot_area_m2 * rainEff * hoursPassed;
 
                     waterL = Math.max(0, waterL + rainL - evapL);
                     p.current_soil_moisture = (waterL / p.root_zone_volume_l) * 100;
                     p.last_sample_ts = state.sim.virtualTime;
                     
                     const decision = computeIrrigationDecision(p.current_soil_moisture, p, weather);
-                    this.checkAlerts(p);
+                    this.checkAlerts(p, weather);
 
-                    // Pulsed Watering Engine
+                    // --- HIGH SPEED PULSED WATERING ENGINE ---
                     if (!p.waterQueue) p.waterQueue = { active: false, remainingL: 0, nextPulseTs: 0 };
                     
                     if (p.waterQueue.active) {
                         if (state.sim.virtualTime >= p.waterQueue.nextPulseTs) {
                             const sp = SOIL_PROPERTIES[p.soil_type || 'loam'];
-                            if (p.current_soil_moisture >= (sp.field_capacity_pct * 1.5)) {
-                                p.waterQueue.active = false; // Emergency cancel if suddenly flooded by rain + pulse
-                                if(state.currentView === 'plant') showToast('Mức ẩm vượt an toàn, hủy chuỗi bơm.');
+                            if (p.current_soil_moisture >= (sp.field_capacity_pct * 1.3)) {
+                                p.waterQueue.active = false; 
+                                if(state.currentView === 'plant') showToast('Safety Break: Đất đạt ngưỡng ngập, hủy chuỗi bơm.');
                             } else {
-                                const maxP = p.settings.maxPulseL || 0.1;
-                                const V = Math.min(maxP, p.waterQueue.remainingL);
+                                let maxP = parseFloat(p.settings.maxPulseL) || 0.1;
+                                let pauseMs = (parseFloat(p.settings.pauseIntervalSec) || 300) * 1000;
                                 
-                                // Directly add volume back to root zone
+                                // Dynamic Multiplier for high accel (e.g. x3600)
+                                let timeOverdue = state.sim.virtualTime - p.waterQueue.nextPulseTs;
+                                let pulseMultiplier = 1;
+                                if (pauseMs > 0 && timeOverdue > pauseMs) {
+                                    pulseMultiplier = 1 + Math.floor(timeOverdue / pauseMs);
+                                }
+                                
+                                // Group missed pulses together
+                                let V = Math.min(maxP * pulseMultiplier, p.waterQueue.remainingL);
+                                
                                 let newWaterL = (p.root_zone_volume_l * (p.current_soil_moisture / 100)) + V;
                                 p.current_soil_moisture = Math.min(100, (newWaterL / p.root_zone_volume_l) * 100);
                                 p.waterQueue.remainingL -= V;
                                 
                                 if (!p.irrigation_log) p.irrigation_log = [];
-                                p.irrigation_log.unshift({ ts: state.sim.virtualTime, volume_l: V.toFixed(2), reason: 'Pulse' });
+                                p.irrigation_log.unshift({ ts: state.sim.virtualTime, volume_l: V.toFixed(3), reason: 'Pulse' });
                                 if (p.irrigation_log.length > 50) p.irrigation_log.pop();
                                 
-                                if (p.waterQueue.remainingL <= 0.01) p.waterQueue.active = false;
-                                else p.waterQueue.nextPulseTs = state.sim.virtualTime + ((p.settings.pauseIntervalSec || 300) * 1000);
+                                if (p.waterQueue.remainingL <= 0.001) p.waterQueue.active = false;
+                                else p.waterQueue.nextPulseTs = state.sim.virtualTime + pauseMs;
                             }
                         }
                     } else if (decision.willIrrigate && p.settings.mode === 'AI') {
                         p.waterQueue = { active: true, remainingL: decision.volumeToApply, nextPulseTs: state.sim.virtualTime };
                     }
 
-                    // Simple Health Simulation
-                    if (typeof p.health === 'undefined') p.health = 100;
-                    let healthDelta = 0; let stressReason = "Môi trường lý tưởng";
+                    // --- STRICT HEALTH ENGINE ---
+                    let currentHealth = parseFloat(p.health);
+                    if (isNaN(currentHealth)) currentHealth = 100;
+
+                    let healthDelta = 0; let stressReason = "Điều kiện sinh trưởng tốt";
                     const sp = SOIL_PROPERTIES[p.soil_type || 'loam'];
                     
-                    if (p.current_soil_moisture > (sp.field_capacity_pct * 2)) { healthDelta -= 4; stressReason = "Úng nước rễ"; }
-                    else if (p.current_soil_moisture < sp.wilting_point_pct) { healthDelta -= 5; stressReason = "Rễ khô héo"; }
-                    else if (weather.temp > 35 && p.current_soil_moisture < sp.field_capacity_pct) { healthDelta -= 2; stressReason = "Căng thẳng do nhiệt"; }
-                    else { healthDelta += 0.5; }
+                    if (p.current_soil_moisture > (sp.field_capacity_pct * 1.8)) { healthDelta -= 5; stressReason = "Ngập úng rễ nặng"; }
+                    else if (p.current_soil_moisture < sp.wilting_point_pct) { healthDelta -= 6; stressReason = "Rễ khô héo"; }
+                    else if (weather.temp > 35 && weather.humidity < 40) { healthDelta -= 4; stressReason = "Stress nhiệt (Cực nóng & Khô)"; }
+                    else if (weather.temp >= 25 && weather.temp <= 32 && weather.humidity > 85 && p.current_soil_moisture > sp.field_capacity_pct) { healthDelta -= 1; stressReason = "Nguy cơ nấm bệnh (Dư ẩm)"; }
+                    else { healthDelta += 1.0; } // Fast recovery when ideal
                     
-                    p.health = Math.max(0, Math.min(100, p.health + (healthDelta * hoursPassed)));
+                    currentHealth += (healthDelta * hoursPassed);
+                    // Absolute boundary lock
+                    p.health = Math.max(0, Math.min(100, currentHealth));
                     p.stressReason = stressReason;
 
                     if (state.currentView === 'plant' && p.plantId === state.currentPlantId) {
@@ -1190,20 +1212,22 @@
                 if (needUIRender && state.currentView === 'plant') UI.renderLogs(DB.getPlant(state.currentUser.email, state.currentPlantId).irrigation_log);
             },
 
-            checkAlerts(plant) {
+            checkAlerts(plant, weather) {
                 if(!plant.alerts) plant.alerts = [];
                 const m = plant.current_soil_moisture;
                 const now = state.sim.virtualTime;
                 
-                // Throttle alerts every 2 hours sim time
                 const lastAlert = plant.alerts[0];
-                if (lastAlert && (now - lastAlert.ts) < 7200000) return;
+                if (lastAlert && (now - lastAlert.ts) < 7200000) return; // 2 hour throttle
 
                 let msg = null; let level = null;
                 const sp = SOIL_PROPERTIES[plant.soil_type || 'loam'];
                 
-                if (m < sp.wilting_point_pct) { msg = `Cảnh báo NGUY HIỂM: Đất khô qua điểm héo (<${sp.wilting_point_pct}%). Rễ sắp hỏng!`; level = "critical_low"; }
-                else if (m > sp.field_capacity_pct * 1.8) { msg = `Cảnh báo NGẬP ÚNG: Vượt khả năng chịu đựng của đất (> ${sp.field_capacity_pct * 1.8}%)`; level = "critical_high"; }
+                if (m < sp.wilting_point_pct) { msg = `NGUY HIỂM: Đất cạn kiệt (<${sp.wilting_point_pct}%). Rễ đang chết!`; level = "critical_low"; }
+                else if (m < sp.wilting_point_pct + 5) { msg = `Cảnh báo: Đất sắp khô héo, hãy cấp nước.`; level = "warning_low"; }
+                else if (m > sp.field_capacity_pct * 1.8) { msg = `NGẬP ÚNG: Đất bão hòa nước (> ${sp.field_capacity_pct * 1.8}%). Dừng bơm ngay!`; level = "critical_high"; }
+                else if (m > sp.field_capacity_pct * 1.3) { msg = `Cảnh báo: Đất dư ướt, dễ sinh nấm bệnh.`; level = "warning_high"; }
+                else if (weather.temp > 35 && weather.humidity < 40) { msg = `Stress Nhiệt: Thời tiết khắc nghiệt, cây bốc hơi cực mạnh.`; level = "warning_low"; }
 
                 if (msg) {
                     plant.alerts.unshift({ ts: now, msg, level, ack: false });
@@ -1214,21 +1238,17 @@
             }
         };
 
-        // --- 8. EVENT HANDLERS ---
+        // --- EVENT HANDLERS ---
         function submitReport(e) {
             e.preventDefault();
             const report = {
-                id: 'rep_' + Date.now(),
-                plantId: state.currentPlantId,
-                userEmail: state.currentUser.email,
-                title: document.getElementById('r-title').value,
-                description: document.getElementById('r-desc').value,
-                ts: Date.now(),
-                status: 'open'
+                id: 'rep_' + Date.now(), plantId: state.currentPlantId, userEmail: state.currentUser.email,
+                title: document.getElementById('r-title').value, description: document.getElementById('r-desc').value,
+                ts: Date.now(), status: 'open'
             };
             DB.addReport(report);
             document.getElementById('modal-report').classList.add('hidden');
-            showToast('Đã gửi báo lỗi tới Admin Inbox thành công!');
+            showToast('Đã gửi báo lỗi tới Admin Inbox!');
         }
 
         function ackAlert(plantId, ts) {
@@ -1251,40 +1271,31 @@
         function handlePlantSubmit(e) {
             e.preventDefault();
             
-            // Explicit Validations
             const locType = document.getElementById('p-loc-type').value;
             const potVolRaw = document.getElementById('p-pot-vol').value;
-            if (locType === 'in_pot' && (!potVolRaw || parseFloat(potVolRaw) <= 0)) {
-                return showToast('Lỗi: Vui lòng nhập đúng thể tích chậu (Lít)');
-            }
+            if (locType === 'in_pot' && (!potVolRaw || parseFloat(potVolRaw) <= 0)) return showToast('Lỗi: Vui lòng nhập đúng thể tích chậu');
             
             const dpStr = document.getElementById('p-date').value;
-            const datePlanted = new Date(dpStr);
-            const today = new Date();
-            if (datePlanted > today) return showToast('Lỗi: Ngày trồng không thể ở tương lai.');
+            if (new Date(dpStr) > new Date()) return showToast('Lỗi: Ngày trồng không thể ở tương lai.');
 
             const id = document.getElementById('p-id').value;
             let plants = DB.getPlants(state.currentUser.email);
             
             const area = parseFloat(document.getElementById('p-area').value);
-            let rootVol = 5.0;
-            if(locType === 'in_pot') {
-                rootVol = parseFloat(potVolRaw);
-            } else {
-                // Estimate volume: Area (m2) * Depth (m) * 1000 = Liters
-                const depth_m = parseFloat(document.getElementById('p-soil-depth').value) / 100;
-                rootVol = area * depth_m * 1000;
-            }
+            let rootVol = locType === 'in_pot' ? parseFloat(potVolRaw) : (area * (parseFloat(document.getElementById('p-soil-depth').value) / 100) * 1000);
 
             const plantType = document.getElementById('p-type').value;
-            const kcMap = { 'Tomato': 0.95, 'Lettuce': 0.85, 'Herb': 0.90, 'Ornamental': 0.70, 'Tree': 1.1 };
-            
+            const kcMap = { 'Tomato': 1.15, 'Lettuce': 1.0, 'Herb': 0.90, 'Ornamental': 0.30, 'Tree': 1.0 }; 
+            const mode = document.getElementById('p-mode').value;
+            const allowManual = document.getElementById('p-ai-allow-manual').checked;
+
             const plantData = {
                 plantId: id || generateId(),
                 displayName: document.getElementById('p-name').value,
                 plantType: plantType,
+                plant_size: document.getElementById('p-size').value,
                 datePlanted: dpStr,
-                age_days: Math.floor((today - datePlanted) / (1000*60*60*24)),
+                age_days: Math.floor((Date.now() - new Date(dpStr).getTime()) / 86400000),
                 locationType: locType,
                 soil_type: document.getElementById('p-soil-type').value,
                 pot_area_m2: area,
@@ -1295,10 +1306,11 @@
                 current_soil_moisture: parseFloat(document.getElementById('p-soil-init').value),
                 health: 100, stressReason: 'Khởi tạo', last_sample_ts: Date.now(),
                 settings: {
-                    mode: document.getElementById('p-mode').value,
-                    manualVolume: parseFloat(document.getElementById('p-manual-vol').value) || 1.0,
+                    mode: mode,
+                    allowManualOverride: allowManual,
+                    manualVolume: mode==='Manual'? parseFloat(document.getElementById('p-manual-vol').value) : null,
                     maxPulseL: parseFloat(document.getElementById('p-max-pulse').value) || 0.1,
-                    pauseIntervalSec: parseInt(document.getElementById('p-pause-int').value) || 300
+                    pauseIntervalSec: parseFloat(document.getElementById('p-pause-int').value) || 300
                 },
                 notes: "", irrigation_log: [], alerts: [], waterQueue: { active: false, remainingL: 0, nextPulseTs: 0 }
             };
@@ -1306,10 +1318,8 @@
             if (id) {
                 const idx = plants.findIndex(p => p.plantId === id);
                 if(idx !== -1) {
-                    plantData.irrigation_log = plants[idx].irrigation_log; 
-                    plantData.health = plants[idx].health; 
-                    plantData.alerts = plants[idx].alerts;
-                    plantData.waterQueue = plants[idx].waterQueue;
+                    plantData.irrigation_log = plants[idx].irrigation_log; plantData.health = plants[idx].health; 
+                    plantData.alerts = plants[idx].alerts; plantData.waterQueue = plants[idx].waterQueue;
                     plants[idx] = plantData;
                 }
             } else {
@@ -1320,31 +1330,31 @@
             try {
                 DB.savePlants(state.currentUser.email, plants); 
                 UI.closePlantModal(); 
-                showToast('Đã lưu dữ liệu cây');
+                showToast('Đã lưu cấu hình cây');
                 UI.renderDashboard();
                 if (state.currentView === 'plant') Router.navigate('plant', {id: plantData.plantId});
-            } catch (err) {
-                console.error(err);
-                showToast('Lỗi lưu trữ cục bộ: ' + err.message);
-            }
+            } catch (err) { showToast('Lỗi lưu trữ: ' + err.message); }
         }
 
         function manualWater() {
             let plants = DB.getPlants(state.currentUser.email);
             const p = plants.find(x => x.plantId === state.currentPlantId);
             if(p) {
-                const limitL = p.root_zone_volume_l * 0.2; // Max 20% root zone rule
-                let V = p.settings.mode === 'Manual' ? (p.settings.manualVolume || 1.0) : 1.0;
+                if (p.settings.mode === 'AI' && !p.settings.allowManualOverride) {
+                    return showToast('Cây đang khóa AI. Mở Cấu hình -> tick "Cho phép can thiệp" để xả tay.');
+                }
+                const limitL = parseFloat(p.root_zone_volume_l) * 0.2; 
+                let V = p.settings.mode === 'Manual' ? (parseFloat(p.settings.manualVolume) || 1.0) : 1.0;
                 
                 if (V > limitL) {
-                    showToast(`Cảnh báo an toàn: Lượng bơm tay (${V}L) lớn hơn 20% Root Zone. Tự động giảm xuống ${limitL.toFixed(1)}L.`);
+                    showToast(`An toàn: Lượng bơm (${V}L) lớn hơn 20% Root Zone. Giảm xuống ${limitL.toFixed(2)}L.`);
                     V = limitL;
                 }
                 
                 p.waterQueue = { active: true, remainingL: V, nextPulseTs: state.sim.virtualTime };
                 DB.savePlants(state.currentUser.email, plants);
                 UI.updatePlantVisuals(p, WeatherManager.getWeatherForTimestamp(state.sim.virtualTime));
-                showToast(`Kích hoạt bơm thủ công ${V.toFixed(1)} Lít (chế độ nhỏ giọt)`);
+                showToast(`Kích hoạt bơm thủ công ${V.toFixed(2)} Lít`);
             }
         }
 
@@ -1362,14 +1372,12 @@
             if(!p) return;
             const a = document.createElement('a');
             a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(p, null, 2));
-            a.download = `plant_${p.plantId}.json`;
-            a.click();
+            a.download = `plant_${p.plantId}.json`; a.click();
         }
 
         const Admin = {
             renderAll() {
-                this.renderUsers();
-                this.renderInbox();
+                this.renderUsers(); this.renderInbox();
                 let badge = document.getElementById('admin-badge');
                 if(badge) badge.classList.add('hidden');
                 localStorage.setItem(`admin_unread_${state.currentUser.email}`, '0');
@@ -1377,79 +1385,70 @@
             switchTab(tab) {
                 document.getElementById('ad-view-users').classList.toggle('hidden', tab !== 'users');
                 document.getElementById('ad-view-inbox').classList.toggle('hidden', tab !== 'inbox');
-                document.getElementById('ad-tab-users').className = tab === 'users' ? "px-4 py-2 font-bold text-indigo-600 border-b-2 border-indigo-600" : "px-4 py-2 font-medium text-slate-500 hover:text-slate-700";
-                document.getElementById('ad-tab-inbox').className = tab === 'inbox' ? "px-4 py-2 font-bold text-indigo-600 border-b-2 border-indigo-600" : "px-4 py-2 font-medium text-slate-500 hover:text-slate-700";
+                document.getElementById('ad-tab-users').className = tab === 'users' ? "px-3 md:px-4 py-2 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600" : "px-3 md:px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700";
+                document.getElementById('ad-tab-inbox').className = tab === 'inbox' ? "px-3 md:px-4 py-2 text-sm font-bold text-indigo-600 border-b-2 border-indigo-600" : "px-3 md:px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700";
             },
             renderUsers() {
                 try {
-                    const users = DB.getUsers();
-                    const tbody = document.getElementById('admin-users-tbody');
+                    const users = DB.getUsers(); const tbody = document.getElementById('admin-users-tbody');
                     tbody.innerHTML = '';
-                    if (users.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-500 bg-slate-50">Không có dữ liệu hệ thống.</td></tr>`;
-                        return;
-                    }
+                    if (users.length === 0) { tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-500 bg-slate-50">Không có dữ liệu hệ thống.</td></tr>`; return; }
                     users.forEach(u => {
                         const count = DB.getPlants(u.email).length;
                         tbody.innerHTML += `
-                            <tr class="hover:bg-slate-50 border-b border-slate-100">
-                                <td class="px-6 py-3 font-medium text-slate-700">${escapeHTML(u.email)}</td>
-                                <td class="px-6 py-3">${escapeHTML(u.displayName)}</td>
-                                <td class="px-6 py-3">${u.isAdmin ? '<span class="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-bold">Admin</span>' : '<span class="text-slate-500">User</span>'}</td>
-                                <td class="px-6 py-3">${count} / 3</td>
-                                <td class="px-6 py-3">${u.disabled ? '<span class="text-red-500 font-medium">Đã khóa</span>' : '<span class="text-emerald-500 font-medium">Hoạt động</span>'}</td>
-                                <td class="px-6 py-3 text-right">
-                                    ${!u.isAdmin ? `<button onclick="Admin.toggleUser('${u.email}')" class="text-xs bg-white border border-slate-300 px-2 py-1 rounded hover:bg-slate-50">${u.disabled ? 'Mở khóa' : 'Khóa'}</button>` : ''}
+                            <tr class="hover:bg-slate-50 border-b border-slate-100 transition-colors">
+                                <td class="px-4 py-3 font-medium text-slate-700">${escapeHTML(u.email)}</td>
+                                <td class="px-4 py-3">${escapeHTML(u.displayName)}</td>
+                                <td class="px-4 py-3">${u.isAdmin ? '<span class="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-bold">Admin</span>' : '<span class="text-slate-500">User</span>'}</td>
+                                <td class="px-4 py-3">${count} / 3</td>
+                                <td class="px-4 py-3">${u.disabled ? '<span class="text-red-500 font-medium">Đã khóa</span>' : '<span class="text-emerald-500 font-medium">Hoạt động</span>'}</td>
+                                <td class="px-4 py-3 text-right">
+                                    ${!u.isAdmin ? `<button onclick="Admin.toggleUser('${u.email}')" class="text-[10px] md:text-xs bg-white border border-slate-300 px-2 py-1 rounded hover:bg-slate-50 font-bold shadow-sm">${u.disabled ? 'Mở khóa' : 'Khóa'}</button>` : ''}
                                 </td>
                             </tr>
                         `;
                     });
-                } catch(e) { console.error(e); }
+                } catch(e) {}
             },
             renderInbox() {
                 try {
-                    const cont = document.getElementById('admin-inbox-container');
-                    cont.innerHTML = '';
+                    const cont = document.getElementById('admin-inbox-container'); cont.innerHTML = '';
                     const myInboxIds = JSON.parse(localStorage.getItem(`admin_inbox_${state.currentUser.email}`) || '[]');
                     const allReports = DB.getReports();
-                    
                     const myReports = allReports.filter(r => myInboxIds.includes(r.id));
                     
                     if (myReports.length === 0) {
-                        cont.innerHTML = `<div class="p-10 text-center text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-300">Tuyệt vời! Không có báo cáo lỗi nào cần xử lý.</div>`;
-                        return;
+                        cont.innerHTML = `<div class="p-8 text-center text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-300">Không có Ticket lỗi nào cần xử lý.</div>`; return;
                     }
                     
                     myReports.forEach(r => {
                         const isResolved = r.status === 'resolved';
-                        const badge = isResolved ? `<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded text-xs font-bold">Đã xử lý</span>` : `<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-xs font-bold animate-pulse">Cần xử lý</span>`;
+                        const badge = isResolved ? `<span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded text-[10px] font-bold">Đã fix</span>` : `<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-[10px] font-bold animate-pulse">Open</span>`;
                         cont.innerHTML += `
-                            <div class="bg-white p-5 rounded-xl border ${isResolved ? 'border-slate-200' : 'border-amber-300 shadow-md'}">
+                            <div class="bg-white p-4 md:p-5 rounded-xl border ${isResolved ? 'border-slate-200' : 'border-amber-300 shadow-sm'}">
                                 <div class="flex justify-between items-start mb-2">
-                                    <h4 class="font-bold text-slate-800">${escapeHTML(r.title)} ${badge}</h4>
-                                    <span class="text-xs text-slate-400">${formatTime(r.ts)}</span>
+                                    <h4 class="font-bold text-slate-800 text-sm">${escapeHTML(r.title)} ${badge}</h4>
+                                    <span class="text-[10px] text-slate-400">${formatTime(r.ts)}</span>
                                 </div>
-                                <p class="text-sm text-slate-600 mb-3">Từ: <span class="font-medium text-slate-800">${escapeHTML(r.userEmail)}</span> &bull; PlantID: <span class="font-mono text-xs bg-slate-100 px-1 rounded">${r.plantId}</span></p>
-                                <div class="bg-slate-50 p-3 rounded text-sm text-slate-700 mb-4 border border-slate-100">${escapeHTML(r.description)}</div>
+                                <p class="text-xs text-slate-600 mb-3">Từ: <span class="font-medium text-slate-800">${escapeHTML(r.userEmail)}</span> &bull; Plant: <span class="font-mono text-[10px] bg-slate-100 px-1 rounded border border-slate-200">${r.plantId}</span></p>
+                                <div class="bg-slate-50 p-3 rounded text-xs md:text-sm text-slate-700 mb-4 border border-slate-100">${escapeHTML(r.description)}</div>
                                 
                                 ${!isResolved ? `
                                     <div class="flex gap-2">
-                                        <input type="text" id="reply-${r.id}" placeholder="Nhập ghi chú / cách xử lý..." class="flex-1 text-sm p-2 border border-slate-300 rounded outline-none focus:border-indigo-500">
-                                        <button onclick="Admin.resolve('${r.id}')" class="bg-indigo-600 text-white font-medium px-4 py-2 rounded text-sm hover:bg-indigo-700 transition">Đóng Ticket</button>
+                                        <input type="text" id="reply-${r.id}" placeholder="Note xử lý..." class="flex-1 text-xs md:text-sm p-2 border border-slate-300 rounded outline-none focus:border-indigo-500">
+                                        <button onclick="Admin.resolve('${r.id}')" class="bg-indigo-600 text-white font-medium px-3 md:px-4 py-2 rounded text-xs md:text-sm hover:bg-indigo-700 transition shadow-sm">Đóng Ticket</button>
                                     </div>
                                 ` : `
-                                    <div class="text-sm text-indigo-700 bg-indigo-50 p-3 rounded border border-indigo-100"><b>Phản hồi của Admin:</b> ${escapeHTML(r.reply || '')}</div>
+                                    <div class="text-xs md:text-sm text-indigo-700 bg-indigo-50 p-2 md:p-3 rounded border border-indigo-100"><b>Note của Admin:</b> ${escapeHTML(r.reply || '')}</div>
                                 `}
                             </div>
                         `;
                     });
-                } catch(e) { console.error(e); }
+                } catch(e) {}
             },
             resolve(id) {
                 const reply = document.getElementById(`reply-${id}`).value;
-                DB.resolveReport(id, reply);
-                showToast('Đã đánh dấu xử lý ticket thành công!');
-                this.renderInbox();
+                DB.resolveReport(id, reply); showToast('Đã đánh dấu xử lý ticket!'); this.renderInbox();
             },
             toggleUser(email) {
                 let users = DB.getUsers(); const u = users.find(x => x.email === email);
@@ -1457,7 +1456,7 @@
             }
         };
 
-        // --- 9. INIT ---
+        // --- INIT ---
         window.onload = () => {
             DB.init();
             if (Auth.checkSession()) Router.navigate('dashboard');

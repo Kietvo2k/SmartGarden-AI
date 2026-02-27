@@ -1,0 +1,81 @@
+🌿 Hệ Thống Tưới Thông Minh AI (Smart Irrigation Prototype) - V2
+
+Đây là phiên bản Prototype (nguyên mẫu) của hệ thống quản lý tưới tiêu thông minh dành cho nông nghiệp và cây cảnh. Hệ thống chạy hoàn toàn ở môi trường trình duyệt (Client-side) bằng HTML, CSS (Tailwind), và JavaScript thuần, không yêu cầu máy chủ (Backend-less).
+
+✨ Tính năng nổi bật
+
+Tính toán bốc hơi nước (ET0) bằng AI / Công thức vật lý: Hệ thống theo dõi nhiệt độ và độ ẩm không khí (từ API) để tính toán chính xác lượng nước bốc hơi mỗi giờ.
+
+Hệ thống Tưới Nhỏ Giọt (Pulsed Watering): Tự động chia nhỏ lượng nước cần tưới thành các nhát bơm nhỏ (Ví dụ: 0.1L/nhát), đan xen thời gian chờ ngấm để đất không bị sốc nước.
+
+Cơ chế chống chết cây (Anti-Kill System): Giới hạn an toàn cực kỳ nghiêm ngặt: Lượng nước bơm 1 lần không bao giờ vượt quá 20% thể tích vùng rễ, tránh gây ngập úng rễ cục bộ.
+
+Đồng bộ Thời tiết Thực & Dự báo (OpenWeatherMap): Tự động gọi API dự báo 5 ngày tới của thời tiết (Khu vực Huế) làm cơ sở tính toán tự động.
+
+Cỗ Máy Thời Gian (Time Machine & Accelerator): Cho phép tua nhanh thời gian (x60, x600, x3600) để xem trước diễn biến của cây. Giới hạn tối đa giả lập 5 ngày, sau đó hệ thống tự động hoàn tác (Revert) dữ liệu về mốc hiện tại.
+
+Mô phỏng sức khoẻ sinh học: Trạng thái của cây bị ảnh hưởng bởi độ ẩm đất, nhiệt độ cao, khô hạn kéo dài hoặc ngập úng sinh nấm bệnh.
+
+Hệ thống Báo lỗi (Ticketing System): Người dùng có thể gửi báo lỗi trực tiếp từ giao diện cây trồng, Admin có hòm thư riêng để quản lý, đánh dấu xử lý và phản hồi.
+
+🚀 Hướng dẫn chạy dự án
+
+Vì đây là ứng dụng 100% Client-side, bạn không cần cài đặt NodeJS hay Database.
+
+Tải tệp index.html về máy tính.
+
+Mở trực tiếp tệp index.html bằng bất kỳ trình duyệt web hiện đại nào (Chrome, Edge, Safari, Firefox).
+
+Đảm bảo có kết nối Internet để hệ thống tải TailwindCSS CDN và gọi OpenWeather API.
+
+🔐 Thông tin Đăng nhập (Mặc định)
+
+Khi mở ứng dụng lần đầu, bạn sẽ gặp Cổng Truy Cập Kín (Secret Gate).
+
+Mã bí mật (Gate Code): 28022026
+
+Hệ thống sẽ tự động khởi tạo (Seed) 3 tài khoản Admin sau đây vào LocalStorage để kiểm thử (Mật khẩu giống hệt Email):
+
+Kietvo2ktuankiet@gmail.com
+
+nhtlong11022009@gmail.com
+
+tranduydat2509@gmail.com
+
+Lưu ý: Tài khoản của Kietvo2ktuankiet@gmail.com đã được mồi sẵn dữ liệu vài cây trồng (như Cây Sồi Cổ Thụ, Xà Lách) để test.
+
+📂 Cấu trúc Dữ liệu (LocalStorage Keys)
+
+Dữ liệu được lưu trữ cục bộ trong trình duyệt của người dùng (LocalStorage). Nếu bạn muốn xóa trắng dữ liệu, hãy Clear LocalStorage của trình duyệt.
+
+site_seeded_v6_admins: Cờ đánh dấu đã tạo mảng Admin mặc định.
+
+users: Mảng chứa thông tin tất cả tài khoản (Email, Tên, Role, Mật khẩu...).
+
+plants_<email>: Chứa mảng các object Cây Trồng thuộc về email đó (Tối đa 3 cây/user).
+
+reports: Chứa tất cả các Ticket báo lỗi của người dùng.
+
+admin_inbox_<email>: Lưu trữ danh sách ID các báo cáo lỗi được gửi đến hòm thư của Admin cụ thể.
+
+session_currentUser: Lưu phiên đăng nhập hiện tại (SessionStorage).
+
+⚙️ Thiết lập Hệ thống & Cấu hình API
+
+Trong file index.html, bạn có thể tìm thấy biến sau để thay đổi cấu hình API thời tiết nếu cần:
+
+const WeatherManager = {
+    API_KEY: '', // Thay API Key OpenWeatherMap của bạn tại đây
+    // ...
+}
+
+
+(Nếu API bị quá hạn mức hoặc không phản hồi, hệ thống có cơ chế tự động chuyển sang dữ liệu Fake Demo dao động ngày đêm chuẩn tự nhiên).
+
+⚠️ Cảnh báo Bảo mật (Security Warning)
+
+Đây là bản Prototype Mô phỏng nhằm mục đích trình diễn Logic AI, Thuật toán, UI/UX và Kiến trúc luồng dữ liệu.
+
+Mật khẩu đang được lưu ở dạng Plaintext (văn bản thô) trong LocalStorage.
+
+KHÔNG sử dụng mã nguồn này cho môi trường Thực tế (Production) hoặc với dữ liệu người dùng thật nhạy cảm. Để lên Production, cần tách phần lưu trữ sang Database thực (như Firebase, MongoDB) và sử dụng mã hoá mật khẩu (Bcrypt/Argon2) kèm JWT Token.
