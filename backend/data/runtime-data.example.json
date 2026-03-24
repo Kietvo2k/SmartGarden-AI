@@ -1,0 +1,185 @@
+{
+  "users": [
+    {
+      "email": "demo@smartgarden.ai",
+      "displayName": "Demo User",
+      "status": "active",
+      "storeFrozen": false
+    }
+  ],
+  "products": [
+    {
+      "id": "device-standard",
+      "name": "SmartGarden Standard Device",
+      "category": "Device",
+      "productType": "device",
+      "deviceTier": "Standard",
+      "priceVnd": 1190000,
+      "stock": 15,
+      "active": true
+    },
+    {
+      "id": "device-pro",
+      "name": "SmartGarden Pro Device",
+      "category": "Device",
+      "productType": "device",
+      "deviceTier": "Pro",
+      "priceVnd": 2390000,
+      "stock": 10,
+      "active": true
+    },
+    {
+      "id": "sensor-soil",
+      "name": "Soil Moisture Sensor",
+      "category": "Sensor",
+      "productType": "sensor",
+      "priceVnd": 249000,
+      "stock": 40,
+      "active": true
+    }
+  ],
+  "deviceInventory": [
+    {
+      "machineCode": "12003456",
+      "deviceName": "SmartGarden Standard S1",
+      "tier": "Standard",
+      "slotLimit": 1,
+      "inventoryStatus": "owned",
+      "ownerEmail": "demo@smartgarden.ai",
+      "linkedUserEmail": "demo@smartgarden.ai",
+      "linkedAt": "2026-03-24T01:15:00.000Z",
+      "orderId": "ord_seed_001",
+      "codeRevealedAt": "2026-03-24T01:14:00.000Z",
+      "health": "online",
+      "firmwareVersion": "1.4.2",
+      "zoneLabel": "Zone A",
+      "lastSeenAt": "2026-03-24T01:10:00.000Z",
+      "isDemoCode": false
+    },
+    {
+      "machineCode": "44556677",
+      "deviceName": "SmartGarden Pro P1",
+      "tier": "Pro",
+      "slotLimit": 3,
+      "inventoryStatus": "available",
+      "ownerEmail": null,
+      "linkedUserEmail": null,
+      "linkedAt": null,
+      "orderId": null,
+      "codeRevealedAt": null,
+      "health": "online",
+      "firmwareVersion": "2.0.1",
+      "zoneLabel": "Zone Pro",
+      "lastSeenAt": "2026-03-24T01:10:00.000Z",
+      "isDemoCode": false
+    },
+    {
+      "machineCode": "28022026",
+      "deviceName": "Sandbox Device",
+      "tier": "Standard",
+      "slotLimit": 1,
+      "inventoryStatus": "sandbox",
+      "ownerEmail": null,
+      "linkedUserEmail": null,
+      "linkedAt": null,
+      "orderId": null,
+      "codeRevealedAt": null,
+      "health": "offline",
+      "firmwareVersion": "dev-0.1.0",
+      "zoneLabel": "Sandbox",
+      "lastSeenAt": null,
+      "isDemoCode": true
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_seed_001",
+      "userEmail": "demo@smartgarden.ai",
+      "createdAt": "2026-03-24T01:00:00.000Z",
+      "customerName": "Demo User",
+      "phone": "0900000000",
+      "address": "Hue City",
+      "note": "Seed order",
+      "items": [
+        {
+          "productId": "device-standard",
+          "productName": "SmartGarden Standard Device",
+          "productType": "device",
+          "deviceTier": "Standard",
+          "priceVnd": 1190000,
+          "quantity": 1
+        }
+      ],
+      "totalVnd": 1190000,
+      "status": "fulfilled",
+      "devicesIssuedAt": "2026-03-24T01:14:00.000Z"
+    }
+  ],
+  "riskEvents": [],
+  "moderationActions": [],
+  "plants": [
+    {
+      "id": "plant_tomato_01",
+      "siteId": "site_hue_demo",
+      "ownerUserEmail": "demo@smartgarden.ai",
+      "deviceMachineCode": "12003456",
+      "isSimulated": false,
+      "sourceLabel": "device_linked",
+      "displayName": "Ca chua A1",
+      "plantType": "Tomato",
+      "soilType": "loam",
+      "locationType": "in_pot",
+      "rootZoneVolumeLiters": 12,
+      "potAreaM2": 0.07,
+      "cropCoefficient": 0.95,
+      "moistureTargetPct": 34,
+      "moistureLowerBoundPct": 28,
+      "moistureUpperBoundPct": 40,
+      "rainDelayThresholdMm": 4,
+      "maxSingleIrrigationLiters": 1.6,
+      "minSensorFreshnessMinutes": 20,
+      "createdAt": "2026-03-23T12:00:00.000Z",
+      "updatedAt": "2026-03-23T12:00:00.000Z"
+    }
+  ],
+  "sensorSnapshots": [
+    {
+      "plantId": "plant_tomato_01",
+      "capturedAt": "2026-03-23T16:10:00.000Z",
+      "soilMoisturePct": 24.5,
+      "airTempC": 31.2,
+      "airHumidityPct": 67,
+      "lightLux": 32500,
+      "rainRateMmPerHour": 0,
+      "deviceHealth": "online"
+    }
+  ],
+  "forecastBundles": [
+    {
+      "siteId": "site_hue_demo",
+      "provider": "openweathermap",
+      "fetchedAt": "2026-03-23T16:00:00.000Z",
+      "points": [
+        {
+          "timestamp": "2026-03-23T18:00:00.000Z",
+          "tempC": 28.4,
+          "rainMm": 0,
+          "condition": "Cloudy"
+        }
+      ]
+    }
+  ],
+  "irrigationSessions": [
+    {
+      "id": "session_001",
+      "plantId": "plant_tomato_01",
+      "startedAt": "2026-03-23T12:45:00.000Z",
+      "endedAt": "2026-03-23T12:52:00.000Z",
+      "requestedLiters": 0.8,
+      "appliedLiters": 0.8,
+      "trigger": "AI",
+      "status": "completed"
+    }
+  ],
+  "auditEvents": []
+}
